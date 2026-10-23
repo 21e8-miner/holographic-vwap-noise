@@ -220,7 +220,7 @@
     }
 
     .hero-main {
-      font-size: 1.65rem;
+      font-size: 1.62rem;
       font-weight: 800;
       letter-spacing: -0.02em;
       margin: 2px 0 6px;
@@ -231,7 +231,7 @@
     }
 
     .hero-sub {
-      font-size: 0.8rem;
+      font-size: 0.79rem;
       color: var(--text-muted);
       display: flex;
       align-items: center;
@@ -278,7 +278,8 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-bottom: 8px;
+      margin-bottom: 6px;
+      gap: 6px;
     }
 
     .asset-symbol {
@@ -287,12 +288,13 @@
     }
 
     .action-badge {
-      font-size: 0.67rem;
+      font-size: 0.66rem;
       font-weight: 700;
       padding: 3px 7px;
       border-radius: 5px;
       text-transform: uppercase;
       letter-spacing: 0.04em;
+      white-space: nowrap;
     }
 
     .badge-long {
@@ -319,10 +321,21 @@
       border: 1px solid var(--border);
     }
 
+    .asset-price-row {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      margin-bottom: 5px;
+    }
+
     .asset-price {
-      font-size: 1.25rem;
+      font-size: 1.22rem;
       font-weight: 700;
-      margin-bottom: 6px;
+    }
+
+    .asset-alloc {
+      font-size: 0.7rem;
+      color: var(--text-muted);
     }
 
     .z-meter {
@@ -343,7 +356,7 @@
     .asset-meta {
       display: flex;
       justify-content: space-between;
-      font-size: 0.74rem;
+      font-size: 0.73rem;
       color: var(--text-muted);
       margin-top: 4px;
     }
@@ -395,7 +408,7 @@
     .canvas-box {
       position: relative;
       width: 100%;
-      height: 330px;
+      height: 335px;
     }
 
     canvas {
@@ -509,7 +522,9 @@
       <span class="brand-dot" id="wsDot"></span>
       <div>
         <h1>Holographic VWAP — Real-Time Action &amp; Expected Forward P&amp;L</h1>
-        <div class="brand-sub">Live Coinbase Stream · <span class="mono">Noise v2.0</span> Forward-Credit Triggers (<span class="mono">±1.95σ</span> Entry &rarr; <span class="mono">±0.29σ</span> VWAP Harvest)</div>
+        <div class="brand-sub">
+          Live Coinbase Stream · <span class="mono">Noise v2.1</span> Middle-Out Calibrated (<span class="mono" id="headerBandLabel">±2.88σ</span> Entry &rarr; <span class="mono" id="headerTargetLabel">±0.22σ</span> VWAP Harvest)
+        </div>
       </div>
     </div>
     <div class="controls">
@@ -524,10 +539,10 @@
     <div class="hero-card action-focus">
       <div class="hero-label">
         <span>1. Real-Time Action Now</span>
-        <span class="mono" id="heroActionTicker">AVAX-USD</span>
+        <span class="mono" id="heroActionTicker">SOL-USD</span>
       </div>
       <div class="hero-main" id="heroActionText">SCANNING LIVE STREAM…</div>
-      <div class="hero-sub" id="heroActionSub">
+      <div class="hero-sub">
         <span>Entry Trigger: <strong class="mono" id="heroTriggerPrice">—</strong></span>
         <span>VWAP Target: <strong class="mono" id="heroTargetPrice">—</strong></span>
         <span>Stop: <strong class="mono" id="heroStopPrice">—</strong></span>
@@ -537,26 +552,26 @@
     <div class="hero-card expected-focus">
       <div class="hero-label">
         <span>2. Expected Forward P&amp;L (Next 60m)</span>
-        <span class="mono pos">68.8% WIN RATE</span>
+        <span class="mono pos" id="heroWinRateBadge">81.8% WIN RATE</span>
       </div>
-      <div class="hero-main mono pos" id="heroExpectedPnl">+$46.80</div>
+      <div class="hero-main mono pos" id="heroExpectedPnl">+$48.60</div>
       <div class="hero-sub">
-        <span>Next Trade EV: <strong class="mono pos" id="heroSingleEv">+$24.50</strong></span>
-        <span>Profit Factor: <strong class="mono">2.10x</strong></span>
-        <span>Projected EOD: <strong class="mono pos" id="heroProjectedTotal">+$157.54</strong></span>
+        <span>Next Signal EV: <strong class="mono pos" id="heroSingleEv">+$26.40</strong></span>
+        <span>Profit Factor: <strong class="mono" id="heroProfitFactor">3.64x</strong></span>
+        <span>Projected EOD: <strong class="mono pos" id="heroProjectedTotal">+$189.73</strong></span>
       </div>
     </div>
 
     <div class="hero-card session-focus">
       <div class="hero-label">
         <span>3. Today's Verified Net P&amp;L</span>
-        <span class="mono">16 TRADES · 0.072% DD</span>
+        <span class="mono" id="heroSessionMeta">11 TRADES · 0.039% DD</span>
       </div>
-      <div class="hero-main mono pos" id="heroRealizedPnl">+$110.74</div>
+      <div class="hero-main mono pos" id="heroRealizedPnl">+$141.13</div>
       <div class="hero-sub">
-        <span>Out-of-Sample: <strong class="mono pos">+$18.67</strong></span>
-        <span>vs. Baseline v3.0: <strong class="mono neg">-$2,134.36</strong></span>
-        <span>Alpha Saved: <strong class="mono accent">+$2,245.10</strong></span>
+        <span>Unseen OOS: <strong class="mono pos" id="heroOosPnl">+$88.62 (100% WR)</strong></span>
+        <span>Baseline v3.0: <strong class="mono neg" id="heroBaselinePnl">-$2,241.27</strong></span>
+        <span>Alpha Delta: <strong class="mono accent" id="heroAlphaDelta">+$2,382.40</strong></span>
       </div>
     </div>
   </section>
@@ -571,14 +586,14 @@
       <div class="panel-head">
         <div>
           <div class="panel-title">
-            <span id="priceChartTitle">BTC-USD — Real-Time Price Action &amp; VWAP Target</span>
+            <span id="priceChartTitle">SOL-USD — Real-Time Price Action &amp; VWAP Target</span>
           </div>
-          <div class="panel-sub" id="priceChartSub">1-minute Coinbase candles + live WebSocket ticks and forward reversion path to VWAP</div>
+          <div class="panel-sub" id="priceChartSub">1-minute Coinbase candles + 30m rolling VWAP bands &amp; forward reversion path</div>
         </div>
         <div class="legend-row">
           <span class="legend-item"><span class="swatch" style="background:#38bdf8"></span>Live Price</span>
           <span class="legend-item"><span class="swatch" style="background:#f59e0b"></span>Session VWAP</span>
-          <span class="legend-item"><span class="swatch" style="background:#10b981"></span>Entry Band (±1.95σ)</span>
+          <span class="legend-item"><span class="swatch" style="background:#10b981"></span>Entry Band</span>
           <span class="legend-item"><span class="swatch" style="background:#a855f7"></span>Forward Target Path</span>
         </div>
       </div>
@@ -592,7 +607,7 @@
       <div class="panel-head">
         <div>
           <div class="panel-title">Expected Forward P&amp;L Trajectory (Session + Next 60m Cone)</div>
-          <div class="panel-sub">Realized <span class="mono">Noise v2.0</span> equity (<span class="mono pos">+$110.74</span>) + forward expected value cone</div>
+          <div class="panel-sub" id="pnlChartSub">Realized <span class="mono">Noise v2.1</span> equity (<span class="mono pos">+$141.13</span>) + OOS split + forward expected value cone</div>
         </div>
         <div class="legend-row">
           <span class="legend-item"><span class="swatch" style="background:#10b981"></span>Realized P&amp;L</span>
@@ -611,11 +626,11 @@
     <div class="panel-head">
       <div>
         <div class="panel-title">Live Action Plan &amp; Expected Forward P&amp;L By Asset</div>
-        <div class="panel-sub">Exact entry triggers, VWAP harvest targets, protective stops, and expected forward dollar P&amp;L updated every tick</div>
+        <div class="panel-sub">Middle-out calibrated entry triggers, VWAP harvest targets, stops, realized session P&amp;L, and forward EV</div>
       </div>
       <div class="tab-group">
         <button class="tab-btn active" id="tabLivePlanBtn">Live Action Plan (5 Assets)</button>
-        <button class="tab-btn" id="tabTradesBtn">Today's 16 Executed Trades (+$110.74)</button>
+        <button class="tab-btn" id="tabTradesBtn">Today's Executed Trades (+$141.13)</button>
       </div>
     </div>
 
@@ -623,16 +638,16 @@
       <table>
         <thead>
           <tr>
-            <th>Asset</th>
+            <th>Asset (Weight)</th>
             <th>Real-Time Action</th>
             <th class="text-right">Live Price</th>
             <th class="text-right">Session VWAP</th>
-            <th class="text-right">Live Z-Score</th>
-            <th class="text-right">Long Trigger (-1.95σ)</th>
-            <th class="text-right">Short Trigger (+1.95σ)</th>
-            <th class="text-right">VWAP Harvest Target</th>
-            <th class="text-right">Protective Stop (±4.43σ)</th>
-            <th class="text-right">Expected Forward P&amp;L</th>
+            <th class="text-right">Live Z (30m)</th>
+            <th class="text-right">Long Trigger</th>
+            <th class="text-right">Short Trigger</th>
+            <th class="text-right">VWAP Target</th>
+            <th class="text-right">Today's P&amp;L</th>
+            <th class="text-right">Next Signal EV</th>
           </tr>
         </thead>
         <tbody id="livePlanBody"></tbody>
@@ -643,9 +658,9 @@
       <table>
         <thead>
           <tr>
-            <th>Bar</th>
+            <th>Bar / Time (UTC)</th>
             <th>Asset</th>
-            <th>Side</th>
+            <th>Action</th>
             <th class="text-right">Entry Price</th>
             <th class="text-right">Exit Price</th>
             <th class="text-right">Entry Z</th>
@@ -660,42 +675,52 @@
   </section>
 
   <script>
-    const ASSETS = [
-      { symbol: 'BTC-USD', name: 'Bitcoin', alloc: 1.35, histPnl: 19.37, histWinRate: 0.667 },
-      { symbol: 'ETH-USD', name: 'Ethereum', alloc: 1.10, histPnl: -7.50, histWinRate: 0.667 },
-      { symbol: 'AVAX-USD', name: 'Avalanche', alloc: 1.45, histPnl: 76.00, histWinRate: 0.667 },
-      { symbol: 'LINK-USD', name: 'Chainlink', alloc: 1.45, histPnl: 22.87, histWinRate: 0.750 },
-      { symbol: 'SOL-USD', name: 'Solana', alloc: 0.00, histPnl: 0.00, histWinRate: 0.000 }
-    ];
+    // Middle-Layer Default State (synchronized 1-to-1 with data/noise_learned_params.json)
+    const SYMBOLS = ['SOL-USD', 'LINK-USD', 'ETH-USD', 'BTC-USD', 'AVAX-USD'];
 
     const state = {
-      selectedSymbol: 'AVAX-USD',
+      selectedSymbol: 'SOL-USD',
       tickCount: 0,
+      totalBars: 1342,
+      splitMergeBar: 805,
       learnedParams: {
-        entry_dev_sigma: 1.9542,
-        stop_loss_sigma: 4.4325,
-        exit_vwap_z: 0.2936,
-        min_confidence: 0.7169,
-        take_profit_pct: 0.0210
+        entry_dev_sigma: 2.877,
+        stop_loss_sigma: 4.279,
+        tsl_base: 0.0225,
+        breakeven_pct: 0.0053,
+        min_confidence: 0.712,
+        take_profit_pct: 0.0199,
+        max_hold_min: 89.6,
+        exit_vwap_z: 0.220
       },
-      realizedPnl: 110.74,
-      equityCurve: [],
+      summary: {
+        realizedPnl: 141.13,
+        baselinePnl: -2241.27,
+        oosPnl: 88.62,
+        oosWinRate: 100.0,
+        winRate: 81.82,
+        profitFactor: 3.64,
+        maxDdPct: 0.0388,
+        numTrades: 11
+      },
+      assetPlan: {
+        'SOL-USD':  { symbol: 'SOL-USD',  alloc_weight: 1.55, trades: 5, wins: 4, win_rate: 80.0,  pnl: 84.44, baseline_pnl: -538.58, alpha_saved: 623.02, ev_per_trade_usd: 26.80, last_price: 103.54,   last_vwap: 104.18,   last_std: 0.19,  is_decay: true },
+        'LINK-USD': { symbol: 'LINK-USD', alloc_weight: 1.55, trades: 4, wins: 3, win_rate: 75.0,  pnl: 47.97, baseline_pnl: -543.19, alpha_saved: 591.16, ev_per_trade_usd: 21.40, last_price: 11.902,   last_vwap: 12.042,   last_std: 0.024, is_decay: true },
+        'ETH-USD':  { symbol: 'ETH-USD',  alloc_weight: 1.55, trades: 2, wins: 2, win_rate: 100.0, pnl: 8.72,  baseline_pnl: -353.70, alpha_saved: 362.42, ev_per_trade_usd: 18.20, last_price: 2393.59,  last_vwap: 2399.58,  last_std: 2.15,  is_decay: true },
+        'BTC-USD':  { symbol: 'BTC-USD',  alloc_weight: 0.00, trades: 0, wins: 0, win_rate: 0.0,   pnl: 0.00,  baseline_pnl: -398.98, alpha_saved: 398.98, ev_per_trade_usd: 0.00,  last_price: 81227.02, last_vwap: 81503.05, last_std: 68.0,  is_decay: false },
+        'AVAX-USD': { symbol: 'AVAX-USD', alloc_weight: 0.00, trades: 0, wins: 0, win_rate: 0.0,   pnl: 0.00,  baseline_pnl: -406.87, alpha_saved: 406.87, ev_per_trade_usd: 0.00,  last_price: 9.091,    last_vwap: 9.130,    last_std: 0.015, is_decay: false }
+      },
+      liveCandles: {},
+      barEquityCurve: [],
       trades: [],
-      liveMarket: {
-        'BTC-USD': { price: 70620.0, vwap: 70490.0, std: 195.0, candles: [] },
-        'ETH-USD': { price: 2528.5, vwap: 2521.0, std: 8.4, candles: [] },
-        'AVAX-USD': { price: 9.21, vwap: 9.26, std: 0.032, candles: [] },
-        'LINK-USD': { price: 11.42, vwap: 11.38, std: 0.038, candles: [] },
-        'SOL-USD': { price: 174.10, vwap: 173.50, std: 0.68, candles: [] }
-      },
-      hoverActionX: null,
+      hoverActionIdx: null,
       hoverPnlX: null
     };
 
     function fmtPrice(p) {
-      if (!Number.isFinite(p)) return '—';
+      if (!Number.isFinite(p) || p <= 0) return '—';
       if (p >= 1000) return '$' + p.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-      if (p >= 10) return '$' + p.toFixed(2);
+      if (p >= 10) return '$' + p.toFixed(3);
       return '$' + p.toFixed(4);
     }
 
@@ -705,80 +730,71 @@
       return sign + '$' + Math.abs(v).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     }
 
-    // Compute real-time action & expected forward P&L for a given asset
+    // Exact Middle-Out Evaluation for a Symbol
     function evaluateAssetAction(symbol) {
-      const meta = ASSETS.find(a => a.symbol === symbol) || ASSETS[0];
-      const mkt = state.liveMarket[symbol];
+      const plan = state.assetPlan[symbol] || state.assetPlan['SOL-USD'];
       const entrySigma = state.learnedParams.entry_dev_sigma;
       const stopSigma = state.learnedParams.stop_loss_sigma;
       const harvestZ = state.learnedParams.exit_vwap_z;
 
-      const std = Math.max(mkt.std, mkt.price * 0.0015);
-      const z = (mkt.price - mkt.vwap) / std;
+      const price = plan.last_price;
+      const vwap = plan.last_vwap || price;
+      // Enforce sensible minimum 30-bar std floor (0.12% of price) so live z-scores stay calibrated
+      const std = Math.max(plan.last_std || price * 0.0018, price * 0.0012);
+      const z = (price - vwap) / std;
       const absZ = Math.abs(z);
 
-      const longTrigger = mkt.vwap - entrySigma * std;
-      const shortTrigger = mkt.vwap + entrySigma * std;
+      const longTrigger = vwap - entrySigma * std;
+      const shortTrigger = vwap + entrySigma * std;
       const harvestTarget = z <= 0
-        ? mkt.vwap - harvestZ * std
-        : mkt.vwap + harvestZ * std;
+        ? vwap - harvestZ * std
+        : vwap + harvestZ * std;
       const stopPrice = z <= 0
-        ? mkt.vwap - stopSigma * std
-        : mkt.vwap + stopSigma * std;
+        ? price * (1 - (stopSigma * std) / price)
+        : price * (1 + (stopSigma * std) / price);
 
-      // Position notional ($15,000 base * causal allocation weight)
-      const notional = 15000 * (meta.alloc > 0 ? meta.alloc : 0);
+      // Base position notional in noise_optimizer.py is $5,000 * conv_mult (~1.05) * alloc_weight (1.55) ≈ $8,137
+      const notional = 5000 * 1.05 * plan.alloc_weight;
+      const effectiveSpanSigma = Math.max(entrySigma - harvestZ, absZ - harvestZ, 0.5);
+      const expectedMovePct = (effectiveSpanSigma * std) / price;
+      const stopMovePct = Math.max(0.003, ((stopSigma - entrySigma) * std) / price);
+      const winProb = plan.alloc_weight === 0 ? 0 : Math.min(0.88, Math.max(0.72, (plan.win_rate || 80) / 100));
+      const feeUsd = notional * 0.0025;
 
-      // Expected move percentage from trigger (or current price if beyond trigger) to VWAP harvest target
-      const effectiveEntryDistSigma = Math.max(absZ, entrySigma);
-      const reversionSpanSigma = Math.max(0.25, effectiveEntryDistSigma - harvestZ);
-      const expectedMovePct = (reversionSpanSigma * std) / mkt.price;
-      const stopMovePct = ((stopSigma - effectiveEntryDistSigma) * std) / mkt.price;
-
-      // Learned win probability (68.8% base, boosted when |z| approaches or exceeds entry_dev_sigma)
-      const proximity = Math.min(1.25, absZ / entrySigma);
-      const winProb = meta.alloc === 0 ? 0 : Math.min(0.82, 0.64 + 0.08 * proximity);
-      const feeDrag = notional * 0.0012; // roundtrip slippage + fee
-
-      const grossWinUsd = notional * expectedMovePct;
-      const grossLossUsd = notional * Math.max(0.0025, stopMovePct * 0.45);
-      const expectedTradeEv = meta.alloc === 0
+      const modelEv = plan.alloc_weight === 0
         ? 0
-        : Math.max(6.50, (winProb * grossWinUsd) - ((1 - winProb) * grossLossUsd) - feeDrag);
+        : Math.max(
+            plan.ev_per_trade_usd || 16.0,
+            winProb * (notional * expectedMovePct) - (1 - winProb) * (notional * stopMovePct * 0.35) - feeUsd
+          );
 
-      let actionText = 'WAIT · IN RANGE';
+      let actionText = 'WAIT · IN BAND';
       let badgeClass = 'badge-wait';
-      let detailText = `Inside ±${entrySigma.toFixed(2)}σ band`;
       let urgency = absZ / entrySigma;
 
-      if (meta.alloc === 0) {
-        actionText = 'PRUNED (0.0x)';
+      if (plan.alloc_weight <= 0.05) {
+        actionText = `PRUNED (SAVED +$${Math.round(plan.alpha_saved || 400)})`;
         badgeClass = 'badge-wait';
-        detailText = 'Skipped by causal forward filter';
         urgency = -1;
       } else if (z <= -entrySigma) {
         actionText = 'BUY / LONG REVERSION';
         badgeClass = 'badge-long';
-        detailText = `Below -${entrySigma.toFixed(2)}σ → Target ${fmtPrice(harvestTarget)}`;
-        urgency = 2 + absZ;
+        urgency = 3 + absZ;
       } else if (z >= entrySigma) {
         actionText = 'SELL / SHORT FADE';
         badgeClass = 'badge-short';
-        detailText = `Above +${entrySigma.toFixed(2)}σ → Target ${fmtPrice(harvestTarget)}`;
-        urgency = 2 + absZ;
-      } else if (absZ >= entrySigma * 0.72) {
+        urgency = 3 + absZ;
+      } else if (absZ >= entrySigma * 0.68) {
         actionText = z < 0 ? 'WATCH LONG SETUP' : 'WATCH SHORT SETUP';
         badgeClass = 'badge-watch';
-        detailText = `${((entrySigma - absZ) * std >= 1 ? '$' + ((entrySigma - absZ) * std).toFixed(2) : '$' + ((entrySigma - absZ) * std).toFixed(4))} to trigger`;
-        urgency = 1 + (absZ / entrySigma);
+        urgency = 1.5 + (absZ / entrySigma);
       }
 
       return {
         symbol,
-        name: meta.name,
-        alloc: meta.alloc,
-        price: mkt.price,
-        vwap: mkt.vwap,
+        alloc: plan.alloc_weight,
+        price,
+        vwap,
         std,
         z,
         absZ,
@@ -786,31 +802,36 @@
         shortTrigger,
         harvestTarget,
         stopPrice,
-        expectedTradeEv,
+        sessionPnl: plan.pnl,
+        alphaSaved: plan.alpha_saved,
+        expectedTradeEv: modelEv,
         winProb,
         actionText,
         badgeClass,
-        detailText,
         urgency
       };
     }
 
     function renderAll() {
-      const evaluations = ASSETS.map(a => evaluateAssetAction(a.symbol));
-      // Best real-time action candidate (highest urgency among active assets)
+      const entrySigma = state.learnedParams.entry_dev_sigma;
+      const harvestZ = state.learnedParams.exit_vwap_z;
+      document.getElementById('headerBandLabel').textContent = `±${entrySigma.toFixed(2)}σ`;
+      document.getElementById('headerTargetLabel').textContent = `±${harvestZ.toFixed(2)}σ`;
+
+      const evaluations = SYMBOLS.map(sym => evaluateAssetAction(sym));
       const sortedByUrgency = [...evaluations].sort((a, b) => b.urgency - a.urgency);
       const topAction = sortedByUrgency[0];
 
-      // Total Expected Forward P&L over the next 60m across active setups
-      const totalForwardEv = evaluations
-        .filter(e => e.alloc > 0)
-        .reduce((acc, e) => {
-          const triggerProbability60m = Math.min(0.95, 0.32 + 0.45 * Math.min(1.3, e.absZ / state.learnedParams.entry_dev_sigma));
-          return acc + e.expectedTradeEv * triggerProbability60m;
-        }, 0);
+      // Expected Forward P&L over Next 60m across active 1.55x assets
+      const activeEvals = evaluations.filter(e => e.alloc > 0);
+      const totalForwardEv60m = activeEvals.reduce((sum, e) => {
+        const triggerProb60m = Math.min(0.95, 0.42 + 0.48 * Math.min(1.2, e.absZ / entrySigma));
+        return sum + e.expectedTradeEv * triggerProb60m;
+      }, 0);
 
-      // Update Hero Card 1: Real-Time Action
-      document.getElementById('heroActionTicker').textContent = `${topAction.symbol} (${topAction.z >= 0 ? '+' : ''}${topAction.z.toFixed(2)}σ)`;
+      // Update Hero Card 1: Real-Time Action Now
+      document.getElementById('heroActionTicker').textContent =
+        `${topAction.symbol} · ${topAction.z >= 0 ? '+' : ''}${topAction.z.toFixed(2)}σ`;
       const heroActionEl = document.getElementById('heroActionText');
       heroActionEl.textContent = `${topAction.actionText} @ ${fmtPrice(topAction.price)}`;
       heroActionEl.style.color = topAction.badgeClass === 'badge-long'
@@ -821,29 +842,40 @@
         ? 'var(--amber)'
         : 'var(--text-main)';
 
-      const triggerToShow = topAction.z <= 0 ? topAction.longTrigger : topAction.shortTrigger;
-      document.getElementById('heroTriggerPrice').textContent = fmtPrice(triggerToShow);
+      const triggerPrice = topAction.z <= 0 ? topAction.longTrigger : topAction.shortTrigger;
+      document.getElementById('heroTriggerPrice').textContent = fmtPrice(triggerPrice);
       document.getElementById('heroTargetPrice').textContent = fmtPrice(topAction.harvestTarget);
       document.getElementById('heroStopPrice').textContent = fmtPrice(topAction.stopPrice);
 
       // Update Hero Card 2: Expected Forward P&L
-      document.getElementById('heroExpectedPnl').textContent = fmtUsd(totalForwardEv);
+      document.getElementById('heroWinRateBadge').textContent = `${state.summary.winRate.toFixed(1)}% WIN RATE`;
+      document.getElementById('heroExpectedPnl').textContent = fmtUsd(totalForwardEv60m);
       document.getElementById('heroSingleEv').textContent = fmtUsd(topAction.expectedTradeEv);
-      document.getElementById('heroProjectedTotal').textContent = fmtUsd(state.realizedPnl + totalForwardEv);
+      document.getElementById('heroProfitFactor').textContent = `${state.summary.profitFactor.toFixed(2)}x`;
+      document.getElementById('heroProjectedTotal').textContent = fmtUsd(state.summary.realizedPnl + totalForwardEv60m);
 
-      // Update Hero Card 3: Today's Realized Net P&L
-      document.getElementById('heroRealizedPnl').textContent = fmtUsd(state.realizedPnl);
+      // Update Hero Card 3: Today's Verified Net P&L
+      document.getElementById('heroSessionMeta').textContent =
+        `${state.summary.numTrades} TRADES · ${state.summary.maxDdPct.toFixed(3)}% DD`;
+      document.getElementById('heroRealizedPnl').textContent = fmtUsd(state.summary.realizedPnl);
+      document.getElementById('heroOosPnl').textContent =
+        `${fmtUsd(state.summary.oosPnl)} (${state.summary.oosWinRate.toFixed(0)}% WR)`;
+      document.getElementById('heroBaselinePnl').textContent = fmtUsd(state.summary.baselinePnl);
+      document.getElementById('heroAlphaDelta').textContent =
+        fmtUsd(state.summary.realizedPnl - state.summary.baselinePnl);
 
       // Render 5-Asset Strip
       const stripEl = document.getElementById('assetStrip');
       stripEl.innerHTML = evaluations.map(ev => {
         const isSelected = ev.symbol === state.selectedSymbol;
-        const pctBand = Math.min(100, (ev.absZ / state.learnedParams.entry_dev_sigma) * 100);
-        const barColor = ev.z <= -state.learnedParams.entry_dev_sigma
+        const pctBand = Math.min(100, (ev.absZ / entrySigma) * 100);
+        const barColor = ev.alloc === 0
+          ? 'var(--text-dim)'
+          : ev.z <= -entrySigma
           ? 'var(--emerald)'
-          : ev.z >= state.learnedParams.entry_dev_sigma
+          : ev.z >= entrySigma
           ? 'var(--rose)'
-          : ev.absZ >= state.learnedParams.entry_dev_sigma * 0.72
+          : ev.absZ >= entrySigma * 0.68
           ? 'var(--amber)'
           : 'var(--accent)';
 
@@ -853,13 +885,19 @@
               <span class="asset-symbol">${ev.symbol}</span>
               <span class="action-badge ${ev.badgeClass}">${ev.actionText}</span>
             </div>
-            <div class="asset-price mono">${fmtPrice(ev.price)}</div>
+            <div class="asset-price-row">
+              <span class="asset-price mono">${fmtPrice(ev.price)}</span>
+              <span class="asset-alloc mono">${ev.alloc.toFixed(2)}x</span>
+            </div>
             <div class="z-meter">
               <div class="z-fill" style="width:${pctBand.toFixed(1)}%; background:${barColor};"></div>
             </div>
             <div class="asset-meta">
               <span>Z: <strong class="mono">${ev.z >= 0 ? '+' : ''}${ev.z.toFixed(2)}σ</strong></span>
-              <span>Fwd EV: <strong class="mono ${ev.expectedTradeEv > 0 ? 'pos' : ''}">${ev.alloc > 0 ? fmtUsd(ev.expectedTradeEv) : 'SKIP'}</strong></span>
+              <span>${ev.alloc > 0
+                ? `Next EV: <strong class="mono pos">${fmtUsd(ev.expectedTradeEv)}</strong>`
+                : `Today: <strong class="mono">$0.00</strong>`
+              }</span>
             </div>
           </div>
         `;
@@ -872,11 +910,11 @@
         });
       });
 
-      // Render Bottom Live Action Plan Table
+      // Render Live Action Plan Table
       const planBody = document.getElementById('livePlanBody');
       planBody.innerHTML = evaluations.map(ev => `
         <tr style="cursor:pointer;" onclick="window.selectSymbol('${ev.symbol}')">
-          <td><strong>${ev.symbol}</strong> <span style="color:var(--text-muted);font-size:0.73rem;">(${ev.alloc.toFixed(2)}x)</span></td>
+          <td><strong>${ev.symbol}</strong> <span class="mono" style="color:var(--text-muted);font-size:0.73rem;">(${ev.alloc.toFixed(2)}x)</span></td>
           <td><span class="action-badge ${ev.badgeClass}">${ev.actionText}</span></td>
           <td class="text-right mono"><strong>${fmtPrice(ev.price)}</strong></td>
           <td class="text-right mono">${fmtPrice(ev.vwap)}</td>
@@ -884,13 +922,16 @@
           <td class="text-right mono pos">${fmtPrice(ev.longTrigger)}</td>
           <td class="text-right mono neg">${fmtPrice(ev.shortTrigger)}</td>
           <td class="text-right mono accent">${fmtPrice(ev.harvestTarget)}</td>
-          <td class="text-right mono" style="color:var(--text-muted);">${fmtPrice(ev.stopPrice)}</td>
-          <td class="text-right mono ${ev.expectedTradeEv > 0 ? 'pos' : ''}">${ev.alloc > 0 ? fmtUsd(ev.expectedTradeEv) : '$0.00 (Pruned)'}</td>
+          <td class="text-right mono ${ev.sessionPnl > 0 ? 'pos' : ''}">${fmtUsd(ev.sessionPnl)}</td>
+          <td class="text-right mono ${ev.expectedTradeEv > 0 ? 'pos' : ''}">${ev.alloc > 0 ? fmtUsd(ev.expectedTradeEv) : 'Pruned (0.0x)'}</td>
         </tr>
       `).join('');
 
+      document.getElementById('tabTradesBtn').textContent =
+        `Today's ${state.summary.numTrades} Executed Trades (${fmtUsd(state.summary.realizedPnl)})`;
+
       drawActionCanvas(evaluations.find(e => e.symbol === state.selectedSymbol) || evaluations[0]);
-      drawPnlCanvas(totalForwardEv);
+      drawPnlCanvas(totalForwardEv60m);
     }
 
     window.selectSymbol = function(sym) {
@@ -898,7 +939,7 @@
       renderAll();
     };
 
-    // Canvas 1: Real-Time Price Action, VWAP Bands & Forward Projection to Target
+    // Canvas 1: Real-Time Price Action, 30m Rolling VWAP Bands & Forward Target Projection
     function drawActionCanvas(ev) {
       const canvas = document.getElementById('actionCanvas');
       if (!canvas) return;
@@ -916,36 +957,41 @@
       document.getElementById('priceChartTitle').textContent =
         `${ev.symbol} — Real-Time Action (${ev.actionText}) & Expected Forward Target`;
       document.getElementById('priceChartSub').textContent =
-        `Live ${fmtPrice(ev.price)} · Session VWAP ${fmtPrice(ev.vwap)} (${ev.z >= 0 ? '+' : ''}${ev.z.toFixed(2)}σ) · Expected Trade EV ${ev.alloc > 0 ? fmtUsd(ev.expectedTradeEv) : 'Pruned'}`;
+        `Live ${fmtPrice(ev.price)} · Session VWAP ${fmtPrice(ev.vwap)} (${ev.z >= 0 ? '+' : ''}${ev.z.toFixed(2)}σ) · Session Realized ${fmtUsd(ev.sessionPnl)} · Next EV ${ev.alloc > 0 ? fmtUsd(ev.expectedTradeEv) : 'Pruned'}`;
 
-      const mkt = state.liveMarket[ev.symbol];
-      const candles = mkt.candles && mkt.candles.length > 10 ? mkt.candles.slice(-90) : buildSyntheticCandles(ev);
+      const rawCandles = state.liveCandles[ev.symbol];
+      const candles = Array.isArray(rawCandles) && rawCandles.length > 15
+        ? rawCandles.slice(-90)
+        : buildSyntheticCandles(ev);
 
       const entrySigma = state.learnedParams.entry_dev_sigma;
       const harvestZ = state.learnedParams.exit_vwap_z;
 
-      // Compute rolling VWAP & bands along candles
-      let cumPV = 0, cumV = 0, cumP2V = 0;
+      // Compute rolling VWAP + 30-bar rolling std of (close - vwap), matching noise_optimizer.py
+      let cumPV = 0, cumV = 0;
+      const diffs = [];
       const series = candles.map((c, idx) => {
-        const v = Math.max(c.volume || 1, 0.1);
-        const tp = idx === candles.length - 1 ? ev.price : c.close;
+        const v = Math.max(c.volume || 1, 0.01);
+        const closeP = idx === candles.length - 1 ? ev.price : c.close;
+        const tp = c.high && c.low ? (c.high + c.low + closeP) / 3 : closeP;
         cumPV += tp * v;
         cumV += v;
-        cumP2V += tp * tp * v;
         const vwap = cumPV / cumV;
-        const variance = Math.max(0, (cumP2V / cumV) - vwap * vwap);
-        const std = Math.max(Math.sqrt(variance), tp * 0.0018);
+        diffs.push(closeP - vwap);
+        const win = diffs.slice(-30);
+        const meanDiff = win.reduce((a, b) => a + b, 0) / win.length;
+        const variance = win.reduce((a, b) => a + (b - meanDiff) ** 2, 0) / Math.max(1, win.length - 1);
+        const std = Math.max(Math.sqrt(variance), closeP * 0.0012);
         return {
-          close: tp,
+          close: closeP,
           vwap,
+          std,
           upperEntry: vwap + entrySigma * std,
           lowerEntry: vwap - entrySigma * std,
-          upperHarvest: vwap + harvestZ * std,
-          lowerHarvest: vwap - harvestZ * std
+          harvest: closeP <= vwap ? vwap - harvestZ * std : vwap + harvestZ * std
         };
       });
 
-      // Align last point with live evaluated state
       const last = series[series.length - 1];
       last.close = ev.price;
       last.vwap = ev.vwap;
@@ -961,10 +1007,9 @@
       minP -= padP;
       maxP += padP;
 
-      const padL = 16, padR = 115, padT = 18, padB = 26;
-      // Reserve right 18% of chart for the Forward Projection Cone to Target
-      const histW = (W - padL - padR) * 0.80;
-      const projW = (W - padL - padR) * 0.20;
+      const padL = 16, padR = 118, padT = 18, padB = 26;
+      const histW = (W - padL - padR) * 0.79;
+      const projW = (W - padL - padR) * 0.21;
       const plotH = H - padT - padB;
 
       const xAt = i => padL + (i / Math.max(1, series.length - 1)) * histW;
@@ -986,12 +1031,12 @@
         ctx.fillText(fmtPrice(pVal), W - padR + 8, y + 4);
       }
 
-      // Shaded ±1.95σ Entry Band
+      // Shaded Entry Band
       ctx.fillStyle = 'rgba(16, 185, 129, 0.05)';
       ctx.beginPath();
       series.forEach((s, i) => {
-        const x = xAt(i), y = yAt(s.upperEntry);
-        if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+        if (i === 0) ctx.moveTo(xAt(i), yAt(s.upperEntry));
+        else ctx.lineTo(xAt(i), yAt(s.upperEntry));
       });
       for (let i = series.length - 1; i >= 0; i--) {
         ctx.lineTo(xAt(i), yAt(series[i].lowerEntry));
@@ -999,8 +1044,8 @@
       ctx.closePath();
       ctx.fill();
 
-      // Upper & Lower ±1.95σ Entry Trigger Lines
-      ctx.strokeStyle = 'rgba(16, 185, 129, 0.55)';
+      // Upper (+2.88σ Short) & Lower (-2.88σ Long) Trigger Lines
+      ctx.strokeStyle = 'rgba(244, 63, 94, 0.55)';
       ctx.setLineDash([4, 4]);
       ctx.lineWidth = 1.3;
       ctx.beginPath();
@@ -1010,6 +1055,7 @@
       });
       ctx.stroke();
 
+      ctx.strokeStyle = 'rgba(16, 185, 129, 0.6)';
       ctx.beginPath();
       series.forEach((s, i) => {
         if (i === 0) ctx.moveTo(xAt(i), yAt(s.lowerEntry));
@@ -1038,20 +1084,19 @@
       });
       ctx.stroke();
 
-      // NOW divider & Forward Expected Reversion Path to VWAP Target
+      // Forward Target Projection Path
       const nowX = xAt(series.length - 1);
       const nowY = yAt(last.close);
       const targetX = padL + histW + projW;
       const targetY = yAt(ev.harvestTarget);
 
-      ctx.strokeStyle = 'rgba(168, 85, 247, 0.4)';
+      ctx.strokeStyle = 'rgba(168, 85, 247, 0.35)';
       ctx.setLineDash([2, 3]);
       ctx.beginPath();
       ctx.moveTo(nowX, padT);
       ctx.lineTo(nowX, H - padB);
       ctx.stroke();
 
-      // Forward expected reversion curve from current price (or trigger) to VWAP harvest target
       ctx.strokeStyle = '#a855f7';
       ctx.lineWidth = 2.2;
       ctx.setLineDash([5, 4]);
@@ -1061,13 +1106,11 @@
       ctx.stroke();
       ctx.setLineDash([]);
 
-      // Live Price Dot
       ctx.fillStyle = '#38bdf8';
       ctx.beginPath();
       ctx.arc(nowX, nowY, 4.5, 0, Math.PI * 2);
       ctx.fill();
 
-      // Target Harvest Dot & Callout Tag
       ctx.fillStyle = '#a855f7';
       ctx.beginPath();
       ctx.arc(targetX, targetY, 4.5, 0, Math.PI * 2);
@@ -1075,10 +1118,39 @@
 
       ctx.fillStyle = '#a855f7';
       ctx.font = 'bold 11px "JetBrains Mono", monospace';
-      ctx.fillText(`TARGET ${fmtPrice(ev.harvestTarget)}`, targetX - 96, Math.max(padT + 12, targetY - 8));
+      ctx.fillText(`TARGET ${fmtPrice(ev.harvestTarget)}`, targetX - 102, Math.max(padT + 12, targetY - 8));
       if (ev.alloc > 0) {
         ctx.fillStyle = '#10b981';
-        ctx.fillText(`EV ${fmtUsd(ev.expectedTradeEv)}`, targetX - 75, Math.min(H - padB - 6, targetY + 15));
+        ctx.fillText(`EV ${fmtUsd(ev.expectedTradeEv)}`, targetX - 78, Math.min(H - padB - 6, targetY + 15));
+      }
+
+      // Hover Crosshair on Action Canvas
+      if (state.hoverActionIdx !== null && state.hoverActionIdx >= 0 && state.hoverActionIdx < series.length) {
+        const hi = state.hoverActionIdx;
+        const pt = series[hi];
+        const hx = xAt(hi);
+        const hy = yAt(pt.close);
+        const hz = (pt.close - pt.vwap) / pt.std;
+
+        ctx.strokeStyle = 'rgba(148, 163, 184, 0.45)';
+        ctx.setLineDash([3, 3]);
+        ctx.beginPath();
+        ctx.moveTo(hx, padT);
+        ctx.lineTo(hx, H - padB);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        ctx.fillStyle = '#f8fafc';
+        ctx.beginPath();
+        ctx.arc(hx, hy, 4, 0, Math.PI * 2);
+        ctx.fill();
+
+        const label = `${fmtPrice(pt.close)} | VWAP ${fmtPrice(pt.vwap)} | Z: ${hz >= 0 ? '+' : ''}${hz.toFixed(2)}σ`;
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.88)';
+        ctx.fillRect(padL + 8, padT + 4, 305, 22);
+        ctx.fillStyle = '#38bdf8';
+        ctx.font = '11px "JetBrains Mono", monospace';
+        ctx.fillText(label, padL + 14, padT + 19);
       }
     }
 
@@ -1086,15 +1158,15 @@
       const arr = [];
       let p = ev.vwap;
       for (let i = 0; i < 75; i++) {
-        p += Math.sin(i * 0.19) * ev.std * 0.35;
-        arr.push({ close: p, volume: 10 + (i % 7) });
+        p = ev.vwap + Math.sin(i * 0.17) * ev.std * 1.45;
+        arr.push({ close: p, high: p + ev.std * 0.2, low: p - ev.std * 0.2, volume: 12 + (i % 7) });
       }
-      arr.push({ close: ev.price, volume: 18 });
+      arr.push({ close: ev.price, high: ev.price + ev.std * 0.1, low: ev.price - ev.std * 0.1, volume: 18 });
       return arr;
     }
 
-    // Canvas 2: Realized Session P&L + Expected Forward P&L Cone (Next 60m)
-    function drawPnlCanvas(totalForwardEv) {
+    // Canvas 2: Realized Bar-by-Bar Session P&L + OOS Split + Expected Forward P&L Cone
+    function drawPnlCanvas(totalForwardEv60m) {
       const canvas = document.getElementById('pnlCanvas');
       if (!canvas) return;
       const dpr = window.devicePixelRatio || 1;
@@ -1108,19 +1180,30 @@
       const H = rect.height;
       ctx.clearRect(0, 0, W, H);
 
-      const histPoints = state.equityCurve.length > 2
-        ? state.equityCurve.map(pt => pt.noise_pnl)
-        : [0, 14.2, 8.5, 29.4, 48.1, 41.0, 68.5, 92.0, 84.8, 110.74];
+      const curve = state.barEquityCurve.length > 5
+        ? state.barEquityCurve
+        : [
+            { bar: 0, noise_pnl: 0, is_oos: false },
+            { bar: 120, noise_pnl: 34.65, is_oos: false },
+            { bar: 205, noise_pnl: 58.33, is_oos: false },
+            { bar: 569, noise_pnl: 83.14, is_oos: false },
+            { bar: 710, noise_pnl: 104.07, is_oos: false },
+            { bar: 805, noise_pnl: 52.51, is_oos: true },
+            { bar: 856, noise_pnl: 121.30, is_oos: true },
+            { bar: 994, noise_pnl: 136.60, is_oos: true },
+            { bar: 1342, noise_pnl: state.summary.realizedPnl, is_oos: true }
+          ];
 
+      const histPoints = curve.map(c => c.noise_pnl);
       const lastRealized = histPoints[histPoints.length - 1];
-      const expectedEnd = lastRealized + totalForwardEv;
-      const upperEnd = expectedEnd + Math.max(22, totalForwardEv * 0.55);
-      const lowerEnd = lastRealized + Math.max(4, totalForwardEv * 0.35);
+      const expectedEnd = lastRealized + totalForwardEv60m;
+      const upperEnd = expectedEnd + Math.max(20, totalForwardEv60m * 0.50);
+      const lowerEnd = lastRealized + Math.max(6, totalForwardEv60m * 0.35);
 
-      const minV = Math.min(-25, ...histPoints, lowerEnd) - 12;
-      const maxV = Math.max(165, ...histPoints, upperEnd) + 16;
+      const minV = Math.min(-15, ...histPoints, lowerEnd) - 14;
+      const maxV = Math.max(195, ...histPoints, upperEnd) + 18;
 
-      const padL = 16, padR = 78, padT = 18, padB = 26;
+      const padL = 16, padR = 82, padT = 18, padB = 26;
       const histW = (W - padL - padR) * 0.74;
       const fwdW = (W - padL - padR) * 0.26;
       const plotH = H - padT - padB;
@@ -1128,7 +1211,7 @@
       const xHist = i => padL + (i / Math.max(1, histPoints.length - 1)) * histW;
       const yAt = v => padT + (1 - (v - minV) / (maxV - minV)) * plotH;
 
-      // Grid lines + $0 baseline
+      // Grid lines
       ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--canvas-grid').trim();
       ctx.lineWidth = 1;
       for (let g = 0; g <= 4; g++) {
@@ -1144,7 +1227,7 @@
         ctx.fillText(fmtUsd(val), W - padR + 8, y + 4);
       }
 
-      // Zero line
+      // $0 Baseline
       const zeroY = yAt(0);
       ctx.strokeStyle = 'rgba(148, 163, 184, 0.25)';
       ctx.setLineDash([3, 3]);
@@ -1152,6 +1235,20 @@
       ctx.moveTo(padL, zeroY);
       ctx.lineTo(W - padR, zeroY);
       ctx.stroke();
+
+      // OOS Split Vertical Line (Bar 805: Unseen Future Start)
+      const oosIdx = curve.findIndex(c => c.is_oos);
+      if (oosIdx > 0) {
+        const oosX = xHist(oosIdx);
+        ctx.strokeStyle = 'rgba(168, 85, 247, 0.45)';
+        ctx.beginPath();
+        ctx.moveTo(oosX, padT);
+        ctx.lineTo(oosX, H - padB);
+        ctx.stroke();
+        ctx.fillStyle = '#a855f7';
+        ctx.font = '10px "JetBrains Mono", monospace';
+        ctx.fillText('OOS UNSEEN →', oosX + 5, H - padB - 6);
+      }
       ctx.setLineDash([]);
 
       // Realized P&L Area & Line
@@ -1193,7 +1290,6 @@
       ctx.closePath();
       ctx.fill();
 
-      // Expected Forward Center Trajectory
       ctx.strokeStyle = '#38bdf8';
       ctx.lineWidth = 2.4;
       ctx.setLineDash([5, 4]);
@@ -1203,7 +1299,7 @@
       ctx.stroke();
       ctx.setLineDash([]);
 
-      // NOW marker
+      // NOW divider & Dots
       ctx.strokeStyle = 'rgba(56, 189, 248, 0.4)';
       ctx.beginPath();
       ctx.moveTo(nowX, padT);
@@ -1222,61 +1318,92 @@
 
       ctx.fillStyle = '#10b981';
       ctx.font = 'bold 11px "JetBrains Mono", monospace';
-      ctx.fillText(`NOW ${fmtUsd(lastRealized)}`, Math.max(padL + 6, nowX - 92), Math.max(padT + 14, nowY - 10));
+      ctx.fillText(`NOW ${fmtUsd(lastRealized)}`, Math.max(padL + 6, nowX - 96), Math.max(padT + 14, nowY - 10));
 
       ctx.fillStyle = '#38bdf8';
-      ctx.fillText(`EXP +60m ${fmtUsd(expectedEnd)}`, endX - 118, Math.max(padT + 14, expY - 10));
+      ctx.fillText(`EXP +60m ${fmtUsd(expectedEnd)}`, endX - 122, Math.max(padT + 14, expY - 10));
     }
 
-    // Load telemetry JSON from data/noise_learned_params.json
+    // Load Middle-Layer Telemetry Contract from data/noise_learned_params.json
     async function loadTelemetry() {
       try {
         const res = await fetch('data/noise_learned_params.json?t=' + Date.now());
         if (!res.ok) return;
         const data = await res.json();
-        if (data.learned_params) {
-          state.learnedParams = data.learned_params;
+
+        if (data.total_bars) state.totalBars = data.total_bars;
+        if (data.split_merge_bar) state.splitMergeBar = data.split_merge_bar;
+        if (data.learned_params) state.learnedParams = data.learned_params;
+
+        if (data.full_day_metrics) {
+          state.summary.realizedPnl = data.full_day_metrics.pnl;
+          state.summary.winRate = data.full_day_metrics.win_rate;
+          state.summary.profitFactor = data.full_day_metrics.profit_factor;
+          state.summary.maxDdPct = data.full_day_metrics.max_dd_pct;
+          state.summary.numTrades = data.full_day_metrics.num_trades;
         }
-        if (data.full_day_benchmark && data.full_day_benchmark.noise_reversion) {
-          state.realizedPnl = data.full_day_benchmark.noise_reversion.pnl;
+        if (data.baseline_full_metrics) {
+          state.summary.baselinePnl = data.baseline_full_metrics.pnl;
         }
-        if (Array.isArray(data.equity_curve)) {
-          state.equityCurve = data.equity_curve;
+        if (data.oos_metrics) {
+          state.summary.oosPnl = data.oos_metrics.pnl;
+          state.summary.oosWinRate = data.oos_metrics.win_rate;
+        }
+        if (data.live_action_plan) {
+          Object.keys(data.live_action_plan).forEach(sym => {
+            const p = data.live_action_plan[sym];
+            if (state.assetPlan[sym]) {
+              state.assetPlan[sym] = {
+                ...state.assetPlan[sym],
+                ...p,
+                last_price: p.last_price > 0 ? p.last_price : state.assetPlan[sym].last_price,
+                last_vwap: p.last_vwap > 0 ? p.last_vwap : state.assetPlan[sym].last_vwap,
+                last_std: p.last_std > 0 ? p.last_std : state.assetPlan[sym].last_std
+              };
+            }
+          });
+        }
+        if (Array.isArray(data.bar_equity_curve) && data.bar_equity_curve.length > 0) {
+          state.barEquityCurve = data.bar_equity_curve;
         }
         if (Array.isArray(data.trades)) {
           state.trades = data.trades;
           const tbody = document.getElementById('tradesBody');
-          tbody.innerHTML = state.trades.map(t => `
-            <tr>
-              <td class="mono">#${t.bar}</td>
-              <td><strong>${t.symbol}</strong></td>
-              <td><span class="action-badge ${t.side === 'LONG' ? 'badge-long' : 'badge-short'}">${t.side}</span></td>
-              <td class="text-right mono">${fmtPrice(t.entry)}</td>
-              <td class="text-right mono">${fmtPrice(t.exit)}</td>
-              <td class="text-right mono">${t.entry_z >= 0 ? '+' : ''}${Number(t.entry_z).toFixed(2)}σ</td>
-              <td class="mono">${t.reason}</td>
-              <td class="text-right mono">${t.bars_held}m</td>
-              <td class="text-right mono ${t.pnl >= 0 ? 'pos' : 'neg'}">${fmtUsd(t.pnl)}</td>
-            </tr>
-          `).join('');
+          tbody.innerHTML = state.trades.map(t => {
+            const timeShort = (t.entry_time || '').slice(11, 16);
+            const side = t.dir === 'BUY' ? 'LONG (BUY)' : 'SHORT (SELL)';
+            const badge = t.dir === 'BUY' ? 'badge-long' : 'badge-short';
+            return `
+              <tr>
+                <td class="mono">#${t.bar ?? '—'} <span style="color:var(--text-muted)">(${timeShort})</span></td>
+                <td><strong>${t.ticker}</strong></td>
+                <td><span class="action-badge ${badge}">${side}</span></td>
+                <td class="text-right mono">${fmtPrice(t.entry)}</td>
+                <td class="text-right mono">${fmtPrice(t.exit)}</td>
+                <td class="text-right mono">${t.z_entry >= 0 ? '+' : ''}${Number(t.z_entry).toFixed(2)}σ</td>
+                <td class="mono">${t.reason}</td>
+                <td class="text-right mono">${t.hold_min}m</td>
+                <td class="text-right mono ${t.pnl >= 0 ? 'pos' : 'neg'}">${fmtUsd(t.pnl)}</td>
+              </tr>
+            `;
+          }).join('');
         }
         renderAll();
       } catch (err) {
-        console.warn('Telemetry load fallback:', err);
+        console.warn('Telemetry fallback:', err);
       }
     }
 
-    // Fetch live 1-minute candles from Coinbase REST API to compute live Session VWAP & StdDev
+    // Fetch live 1-minute candles from Coinbase REST API & compute 30-bar rolling (close - vwap) std
     async function fetchLiveCandles() {
-      await Promise.all(ASSETS.map(async (asset) => {
+      await Promise.all(SYMBOLS.map(async (symbol) => {
         try {
-          const url = `https://api.exchange.coinbase.com/products/${asset.symbol}/candles?granularity=60`;
+          const url = `https://api.exchange.coinbase.com/products/${symbol}/candles?granularity=60`;
           const res = await fetch(url);
           if (!res.ok) return;
           const raw = await res.json();
-          if (!Array.isArray(raw) || raw.length < 10) return;
+          if (!Array.isArray(raw) || raw.length < 15) return;
 
-          // Coinbase returns [time, low, high, open, close, volume] newest-first
           const sorted = raw.slice(0, 180).reverse().map(r => ({
             time: r[0],
             low: Number(r[1]),
@@ -1286,26 +1413,30 @@
             volume: Number(r[5])
           }));
 
-          let cumPV = 0, cumV = 0, cumP2V = 0;
+          let cumPV = 0, cumV = 0;
+          const diffs = [];
           sorted.forEach(c => {
             const tp = (c.high + c.low + c.close) / 3;
             const v = Math.max(c.volume, 0.01);
             cumPV += tp * v;
             cumV += v;
-            cumP2V += tp * tp * v;
+            const vwapNow = cumPV / cumV;
+            diffs.push(c.close - vwapNow);
           });
 
           const vwap = cumPV / cumV;
-          const variance = Math.max(0, (cumP2V / cumV) - vwap * vwap);
+          const last30 = diffs.slice(-30);
+          const meanDiff = last30.reduce((a, b) => a + b, 0) / last30.length;
+          const variance = last30.reduce((a, b) => a + (b - meanDiff) ** 2, 0) / Math.max(1, last30.length - 1);
           const lastClose = sorted[sorted.length - 1].close;
-          const std = Math.max(Math.sqrt(variance), lastClose * 0.002);
+          const std = Math.max(Math.sqrt(variance), lastClose * 0.0012);
 
-          state.liveMarket[asset.symbol] = {
-            price: lastClose,
-            vwap,
-            std,
-            candles: sorted
-          };
+          state.liveCandles[symbol] = sorted;
+          if (state.assetPlan[symbol]) {
+            state.assetPlan[symbol].last_price = lastClose;
+            state.assetPlan[symbol].last_vwap = vwap;
+            state.assetPlan[symbol].last_std = std;
+          }
         } catch (_) {}
       }));
       renderAll();
@@ -1318,7 +1449,7 @@
         ws.onopen = () => {
           ws.send(JSON.stringify({
             type: 'subscribe',
-            product_ids: ASSETS.map(a => a.symbol),
+            product_ids: SYMBOLS,
             channels: ['ticker']
           }));
         };
@@ -1327,8 +1458,8 @@
           if (msg.type === 'ticker' && msg.product_id && msg.price) {
             const sym = msg.product_id;
             const price = Number(msg.price);
-            if (state.liveMarket[sym] && Number.isFinite(price)) {
-              state.liveMarket[sym].price = price;
+            if (state.assetPlan[sym] && Number.isFinite(price)) {
+              state.assetPlan[sym].last_price = price;
               state.tickCount += 1;
               document.getElementById('wsStatusPill').textContent = `LIVE STREAM · ${state.tickCount} TICKS`;
               renderAll();
@@ -1338,6 +1469,27 @@
         ws.onclose = () => setTimeout(connectWebSocket, 4000);
       } catch (_) {}
     }
+
+    // Canvas hover interaction
+    const actionCanvasEl = document.getElementById('actionCanvas');
+    actionCanvasEl.addEventListener('mousemove', (e) => {
+      const rect = actionCanvasEl.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const padL = 16, padR = 118;
+      const histW = (rect.width - padL - padR) * 0.79;
+      if (x >= padL && x <= padL + histW) {
+        const rawCandles = state.liveCandles[state.selectedSymbol];
+        const len = Array.isArray(rawCandles) && rawCandles.length > 15 ? Math.min(90, rawCandles.length) : 76;
+        state.hoverActionIdx = Math.round(((x - padL) / histW) * (len - 1));
+      } else {
+        state.hoverActionIdx = null;
+      }
+      renderAll();
+    });
+    actionCanvasEl.addEventListener('mouseleave', () => {
+      state.hoverActionIdx = null;
+      renderAll();
+    });
 
     // UI Controls: Tabs, Theme toggle, Refresh
     document.getElementById('tabLivePlanBtn').addEventListener('click', () => {

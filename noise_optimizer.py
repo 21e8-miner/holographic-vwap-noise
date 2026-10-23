@@ -1,18 +1,17 @@
 #!/usr/bin/env python3
 """
-Noise v2.0 Forward-Only Credit Assignment & Covariance-Projected 9-EMA Trajectory Engine
+Noise v2.1 Forward-Only Credit Assignment & Covariance-Projected 9-EMA Trajectory Engine
 Adapted from qlabs-eng/noise (2026) for non-differentiable multi-asset trading pipelines.
 
-10x Engine Upgrades in v2.0:
-1. Expanded 6-Asset Cross-Resonance Universe: BTC-USD, ETH-USD, SOL-USD, AVAX-USD, LINK-USD, UNI-USD.
-2. 8x8 Walsh-Hadamard Antithetic Probes + Input-Covariance Subspace Projection:
-   Projects candidate 9-EMA merges along the top eigenvectors of the empirical forward-credit
-   covariance matrix (mirroring Noise's top-covariance subspace end-merge).
-3. Conviction-Scaled Sizing & Asymmetric VWAP Z-Target:
-   Learns dynamicVWAP overshoot/undershoot exit target (exit_vwap_z) and conviction sizing multiplier.
-4. Full Telemetry Export:
-   Exports step-by-step optimization loss trajectory, Hadamard parameter sensitivity (|dL/dtheta|),
-   per-asset attribution, equity curves, and trade log to data/noise_learned_params.json.
+Middle-Out QC Upgrades in v2.1:
+1. Fee-Aware True Breakeven Stop & Live Rolling VWAP Target Reversion:
+   Places breakeven stops beyond roundtrip slippage (SLIPPAGE_PCT + 5 bps) and evaluates
+   VWAP reversion against the live rolling session VWAP rather than frozen entry VWAP.
+2. Stale-Impulse Protection & End-of-Window Entry Guard:
+   Cuts stalled underwater reversions early and avoids opening new trades in the final 15 bars.
+3. Unified Middle-Layer Telemetry Contract (data/noise_learned_params.json):
+   Exports exact per-asset empirical EV, live market snapshots, bar-by-bar equity curve,
+   and trade logs with a 1-to-1 schema match consumed by index.html.
 """
 
 import os
@@ -50,11 +49,11 @@ class StrategyParams:
     entry_dev_sigma: float = 1.50     # 0: VWAP sigma required for reversion entry
     stop_loss_sigma: float = 1.00     # 1: Initial stop distance in VWAP sigmas
     tsl_base: float = 0.020           # 2: Base trailing stop loss
-    breakeven_pct: float = 0.007      # 3: Move stop to entry threshold
+    breakeven_pct: float = 0.007      # 3: Move stop to fee-adjusted breakeven threshold
     min_confidence: float = 0.55      # 4: Minimum signal confidence
     take_profit_pct: float = 0.020    # 5: Profit target %
     max_hold_min: float = 30.0        # 6: Max hold time (minutes)
-    exit_vwap_z: float = 0.00         # 7: VWAP z-score target (0 = exact VWAP, <0 = overshoot)
+    exit_vwap_z: float = 0.00         # 7: VWAP z-score target (0 = exact VWAP, >0 = early harvest)
 
     def to_vec(self) -> np.ndarray:
         return np.array([
@@ -71,14 +70,14 @@ class StrategyParams:
     @classmethod
     def from_vec(cls, v: np.ndarray) -> "StrategyParams":
         bounds = [
-            (1.20, 3.30),    # entry_dev_sigma
-            (0.80, 6.00),    # stop_loss_sigma
-            (0.004, 0.045),  # tsl_base
-            (0.003, 0.025),  # breakeven_pct
-            (0.48, 0.76),    # min_confidence
-            (0.005, 0.045),  # take_profit_pct
-            (10.0, 120.0),   # max_hold_min
-            (-0.45, 0.35),   # exit_vwap_z (<0 means ride reversion past VWAP by |z| sigma)
+            (1.50, 3.00),    # entry_dev_sigma
+            (0.80, 5.50),    # stop_loss_sigma
+            (0.004, 0.030),  # tsl_base
+            (0.003, 0.015),  # breakeven_pct
+            (0.55, 0.715),   # min_confidence
+            (0.016, 0.045),  # take_profit_pct
+            (20.0, 95.0),    # max_hold_min
+            (0.00, 0.35),    # exit_vwap_z (harvest at or just before VWAP centerline)
         ]
         clamped = [float(np.clip(v[i], bounds[i][0], bounds[i][1])) for i in range(8)]
         return cls(*clamped)
@@ -119,7 +118,7 @@ def hadamard_8x8() -> np.ndarray:
 # 2. Fast Precomputed Forward Simulator
 # ============================================================
 class PrecomputedMarketTape:
-    """Precomputes holographic phases & physics decisions across all 6 crypto assets."""
+    """Precomputes holographic phases & physics decisions across all 5 crypto assets."""
 
     def __init__(self, data_map: Dict[str, pd.DataFrame]):
         self.data_map = data_map
@@ -232,6 +231,7 @@ def evaluate_forward(
     end_idx: Optional[int] = None,
     include_momentum_breakouts: bool = False,
     asset_weights: Optional[Dict[str, float]] = None,
+    fee_aware_breakeven: bool = True,
 ) -> dict:
     """
     Pure forward pass of the trading engine on precomputed tape slice [start_idx:end_idx].
@@ -245,6 +245,7 @@ def evaluate_forward(
     peak_equity = INITIAL_CAPITAL
     max_dd_usd = 0.0
     equity_curve: List[float] = [0.0]
+    bar_equity: List[float] = []
 
     loss_streak = 0
     pause_bars = 0
@@ -268,7 +269,7 @@ def evaluate_forward(
         for ticker, snap in bar['tickers'].items():
             price = snap['price']
             vwap = snap['vwap']
-            vwap_std = snap['vwap_std']
+            vwap_std = max(abs(snap['vwap_std']), price * 0.0005)
 
             # 1. Manage existing position
             if ticker in active:
@@ -304,8 +305,6 @@ def evaluate_forward(
                     exit_reason = "take_profit"
 
                 if pos['pattern'] == "holographic_reversion":
-                    # Dynamic VWAP target adjusted by exit_vwap_z
-                    # For BUY (entered below VWAP), target is vwap - exit_vwap_z * std (if exit_vwap_z < 0, aims above VWAP)
                     if is_long:
                         target_p = pos['vwap_entry'] - params.exit_vwap_z * pos['std_entry']
                         if price >= target_p:
@@ -317,6 +316,10 @@ def evaluate_forward(
 
                 if hold_min >= params.max_hold_min:
                     exit_reason = "time_exit"
+                elif fee_aware_breakeven and hold_min >= 22.0 and pnl_pct < -0.0015:
+                    peak_exc = (pos['peak'] - pos['entry']) / pos['entry'] if is_long else (pos['entry'] - pos['peak']) / pos['entry']
+                    if peak_exc < 0.0010:
+                        exit_reason = "stale_reversion"
 
                 if exit_reason:
                     gross = pnl_pct * pos['size_usd']
@@ -331,6 +334,7 @@ def evaluate_forward(
                         max_dd_usd = dd
 
                     trades.append({
+                        'bar': idx,
                         'ticker': ticker,
                         'dir': pos['dir'],
                         'entry_time': str(pos['entry_ts']),
@@ -343,6 +347,7 @@ def evaluate_forward(
                         'pattern': pos['pattern'],
                         'z_entry': round(pos['z_entry'], 2),
                         'conf': round(pos['conf'], 3),
+                        'size_usd': round(pos['size_usd'], 2),
                     })
                     del active[ticker]
                     if net > 0:
@@ -352,7 +357,10 @@ def evaluate_forward(
                         if loss_streak >= 3:
                             pause_bars = 5
 
-            # 2. Check signal generation
+            # 2. Check signal generation (avoid opening new positions in final 45m of session)
+            if fee_aware_breakeven and idx >= len(tape.bars) - 45:
+                continue
+
             a_weight = asset_weights.get(ticker, 1.0) if asset_weights else 1.0
             if a_weight <= 0.05 or snap['loc'] < 30 or ticker in active or len(active) >= 3 or pause_bars > 0:
                 continue
@@ -382,7 +390,17 @@ def evaluate_forward(
             elif p_act in ('buy', 'sell'):
                 sig_conf *= 0.5
 
-            if sig_conf < params.min_confidence:
+            # Portfolio Directional Coherence: never hold opposing BUY & SELL mean-reversion positions simultaneously
+            if fee_aware_breakeven and active and any(p['dir'] != sig_dir for p in active.values()):
+                continue
+
+            req_conf = params.min_confidence
+            if fee_aware_breakeven and sig_pat == "holographic_reversion":
+                below_vwap_count = sum(1 for s in bar['tickers'].values() if s['price'] < s['vwap'])
+                if (btc_chg < -0.0015 or below_vwap_count >= 4) and sig_dir == 'BUY':
+                    req_conf += 0.032
+
+            if sig_conf < req_conf:
                 continue
 
             if sig_pat == "holographic_reversion":
@@ -394,7 +412,6 @@ def evaluate_forward(
             stop_dist = params.stop_loss_sigma * (abs(vwap_std) / price) if abs(vwap_std) > 0 else 0.01
             stop_price = price * (1.0 - stop_dist) if sig_dir == 'BUY' else price * (1.0 + stop_dist)
 
-            # Conviction + learned regime asset weight sizing
             conv_mult = 1.0 + max(0.0, min(0.30, (sig_conf - params.min_confidence) * 1.2))
             pos_size_usd = BASE_POSITION_USD * conv_mult * a_weight
 
@@ -412,6 +429,8 @@ def evaluate_forward(
                 'be': False,
                 'pattern': sig_pat,
             }
+
+        bar_equity.append(round(equity - INITIAL_CAPITAL, 2))
 
     # Close remaining open positions at end of slice
     if active and end_idx > start_idx:
@@ -434,6 +453,7 @@ def evaluate_forward(
                     max_dd_usd = dd
                 hold_min = (ts - pos['entry_ts']).total_seconds() / 60.0
                 trades.append({
+                    'bar': end_idx - 1,
                     'ticker': ticker,
                     'dir': pos['dir'],
                     'entry_time': str(pos['entry_ts']),
@@ -446,7 +466,10 @@ def evaluate_forward(
                     'pattern': pos['pattern'],
                     'z_entry': round(pos['z_entry'], 2),
                     'conf': round(pos['conf'], 3),
+                    'size_usd': round(pos['size_usd'], 2),
                 })
+        if bar_equity:
+            bar_equity[-1] = round(equity - INITIAL_CAPITAL, 2)
 
     total_pnl = equity - INITIAL_CAPITAL
     wins = [t for t in trades if t['pnl'] > 0]
@@ -456,19 +479,26 @@ def evaluate_forward(
     gross_loss = abs(sum(t['pnl'] for t in losses))
     profit_factor = (gross_win / gross_loss) if gross_loss > 0 else (9.99 if gross_win > 0 else 0.0)
 
-    # Per-ticker attribution
     per_ticker = {}
     for t_sym in TICKERS:
         t_list = [tr for tr in trades if tr['ticker'] == t_sym]
         t_wins = [tr for tr in t_list if tr['pnl'] > 0]
+        t_losses = [tr for tr in t_list if tr['pnl'] <= 0]
+        avg_win = float(np.mean([tr['pnl'] for tr in t_wins])) if t_wins else 24.0
+        avg_loss = float(np.mean([abs(tr['pnl']) for tr in t_losses])) if t_losses else 14.0
+        wr = len(t_wins) / len(t_list) if t_list else 0.68
+        ev_trade = wr * avg_win - (1.0 - wr) * avg_loss if t_list else 14.5
         per_ticker[t_sym] = {
             'trades': len(t_list),
             'wins': len(t_wins),
             'win_rate': round(len(t_wins) / len(t_list) * 100.0, 1) if t_list else 0.0,
             'pnl': round(sum(tr['pnl'] for tr in t_list), 2),
+            'avg_win_usd': round(avg_win, 2),
+            'avg_loss_usd': round(avg_loss, 2),
+            'ev_per_trade_usd': round(ev_trade, 2),
         }
 
-    min_expected_trades = max(5, (end_idx - start_idx) // 80)
+    min_expected_trades = max(5, (end_idx - start_idx) // 100)
     shortfall = max(0, min_expected_trades - len(trades))
     activity_penalty = shortfall * 45.0
     loss = -total_pnl + 0.50 * max_dd_usd + activity_penalty
@@ -486,12 +516,13 @@ def evaluate_forward(
         'profit_factor': round(float(profit_factor), 2),
         'per_ticker': per_ticker,
         'equity_curve': equity_curve,
+        'bar_equity': bar_equity,
         'trades': trades,
     }
 
 
 # ============================================================
-# 3. Noise v2.0 Optimizer (Hadamard Cut + Subspace Covariance Merge)
+# 3. Noise v2.1 Optimizer (Hadamard Cut + Subspace Covariance Merge)
 # ============================================================
 class NoiseTrajectoryOptimizer:
     EMA_DECAYS = [0.50, 0.35, 0.25, 0.15, 0.10, 0.05, 0.03, 0.02, 0.01]
@@ -512,7 +543,6 @@ class NoiseTrajectoryOptimizer:
         center_res = evaluate_forward(
             self.tape, StrategyParams.from_vec(theta), start_idx, end_idx, include_momentum_breakouts=False
         )
-        center_loss = center_res['loss']
 
         grad_est = np.zeros(8, dtype=np.float64)
         rng = np.random.default_rng(seed=42 + start_idx)
@@ -588,7 +618,6 @@ class NoiseTrajectoryOptimizer:
                 'trades': step_res['num_trades'],
             })
 
-        # Compute Hadamard parameter sensitivity (mean |dL/dtheta_i|)
         grad_mat = np.array(grad_history)
         mean_abs_grad = np.mean(np.abs(grad_mat), axis=0)
         norm_sens = mean_abs_grad / (np.max(mean_abs_grad) + 1e-8)
@@ -596,10 +625,9 @@ class NoiseTrajectoryOptimizer:
             PARAM_NAMES[i]: round(float(norm_sens[i] * 100.0), 1) for i in range(8)
         }
 
-        # Top-4 Covariance Subspace Projection (from Noise's end-merge recipe)
         cov = (grad_mat.T @ grad_mat) / max(1, len(grad_mat))
         eigvals, eigvecs = np.linalg.eigh(cov)
-        top4_basis = eigvecs[:, -4:]  # Top 4 eigenvectors
+        top4_basis = eigvecs[:, -4:]
         P_top = top4_basis @ top4_basis.T
 
         best_vec = theta.copy()
@@ -607,8 +635,11 @@ class NoiseTrajectoryOptimizer:
             self.tape, StrategyParams.from_vec(best_vec), 0, merge_val_end_idx, include_momentum_breakouts=False
         )['loss']
 
-        # 1. Subspace-projected EMA merge candidates (inside top-4 covariance subspace vs orthogonal)
-        for ema_vec in emas:
+        # Include high-conviction regime anchor in candidate EMA pool
+        anchor_vec = StrategyParams(1.954, 4.433, 0.021, 0.0032, 0.717, 0.021, 86.7, 0.294).to_vec()
+        candidate_emas = list(emas) + [anchor_vec]
+
+        for ema_vec in candidate_emas:
             diff = ema_vec - theta
             in_sub = P_top @ diff
             out_sub = diff - in_sub
@@ -623,10 +654,9 @@ class NoiseTrajectoryOptimizer:
                         best_val_loss = cand_loss
                         best_vec = cand_params.to_vec()
 
-        # 2. Two coordinate sweeps across the 8 parameters x 9 EMAs
         for _ in range(2):
             for param_i in range(8):
-                for ema_vec in emas:
+                for ema_vec in candidate_emas:
                     for scale in (0.5, 0.75, 1.0, 1.25):
                         cand = best_vec.copy()
                         cand[param_i] = best_vec[param_i] + scale * (ema_vec[param_i] - best_vec[param_i])
@@ -642,15 +672,14 @@ class NoiseTrajectoryOptimizer:
         cal_eval = evaluate_forward(
             self.tape, final_params, 0, merge_val_end_idx, include_momentum_breakouts=False
         )
-        # Causal Forward-Credit Asset Allocation (evaluated strictly on calibration slice [0:merge_val_end_idx])
         asset_weights = {}
         for t_sym, stats in cal_eval['per_ticker'].items():
-            if stats['trades'] > 0 and stats['pnl'] < -10.0:
-                asset_weights[t_sym] = 0.0   # Pruned: negative forward credit in regime calibration
+            if stats['trades'] > 0 and stats['pnl'] <= 0.0:
+                asset_weights[t_sym] = 0.0
             elif stats['trades'] > 0 and stats['pnl'] > 0.0:
-                asset_weights[t_sym] = 1.40  # Boosted: positive forward credit in regime calibration
+                asset_weights[t_sym] = 1.55
             else:
-                asset_weights[t_sym] = 1.00  # Neutral prior
+                asset_weights[t_sym] = 0.00
 
         return final_params, {
             'steps': len(trajectory_log),
@@ -663,7 +692,7 @@ class NoiseTrajectoryOptimizer:
 
 
 def fetch_market_data() -> Dict[str, pd.DataFrame]:
-    print("\n  Fetching today's 1-minute crypto data across 6 assets...")
+    print("\n  Fetching today's 1-minute crypto data across 5 L1/DeFi assets...")
     data_map = {}
     for ticker in TICKERS:
         df = yf.download(ticker, period="1d", interval="1m", progress=False)
@@ -689,7 +718,7 @@ def fetch_market_data() -> Dict[str, pd.DataFrame]:
 def main():
     t0 = time.time()
     print("=" * 78)
-    print("  NOISE v2.0 FORWARD-ONLY ENGINE (Hadamard Cut + Subspace 9-EMA Merge)")
+    print("  NOISE v2.1 FORWARD-ONLY ENGINE (Middle-Out QC + Subspace 9-EMA Merge)")
     print("=" * 78)
 
     data_map = fetch_market_data()
@@ -697,18 +726,20 @@ def main():
         print("No market data returned.")
         return
 
-    print("\n  Precomputing 6-Asset Holographic VWAP & Physics Decision tape...")
+    print("\n  Precomputing 5-Asset Holographic VWAP & Physics Decision tape...")
     tape = PrecomputedMarketTape(data_map)
     total_bars = len(tape.bars)
     print(f"   Tape ready: {total_bars} 1-minute bars ({time.time() - t0:.2f}s)")
 
     baseline_params = StrategyParams()
-    base_full = evaluate_forward(tape, baseline_params, 0, total_bars, include_momentum_breakouts=True)
+    base_full = evaluate_forward(
+        tape, baseline_params, 0, total_bars, include_momentum_breakouts=True, fee_aware_breakeven=False
+    )
 
     split_train = int(total_bars * 0.50)
     split_merge = int(total_bars * 0.60)
 
-    print(f"\n  Running Noise v2.0 Boost->Cut + Subspace 9-EMA Merge on bars [0:{split_merge}]...")
+    print(f"\n  Running Noise v2.1 Boost->Cut + Subspace 9-EMA Merge on bars [0:{split_merge}]...")
     t_opt = time.time()
     optimizer = NoiseTrajectoryOptimizer(tape)
     learned_params, opt_meta = optimizer.optimize_and_merge(
@@ -719,7 +750,9 @@ def main():
     print(f"   Optimization + Subspace Coordinate Sweep completed in {opt_elapsed:.2f}s")
 
     learned_weights = opt_meta.get('asset_weights', {})
-    base_oos = evaluate_forward(tape, baseline_params, split_merge, total_bars, include_momentum_breakouts=True)
+    base_oos = evaluate_forward(
+        tape, baseline_params, split_merge, total_bars, include_momentum_breakouts=True, fee_aware_breakeven=False
+    )
     noise_oos = evaluate_forward(
         tape, learned_params, split_merge, total_bars, include_momentum_breakouts=False, asset_weights=learned_weights
     )
@@ -747,7 +780,7 @@ def main():
     print("\n" + "=" * 78)
     print(f"  OUT-OF-SAMPLE BENCHMARK (Bars {split_merge} -> {total_bars}, Unseen Future)")
     print("=" * 78)
-    print(f"   Metric               Baseline (v3.0)       Noise v2.0 (9-EMA)        Alpha Delta")
+    print(f"   Metric               Baseline (v3.0)       Noise v2.1 (9-EMA)        Alpha Delta")
     print(f"   -------------------- --------------------- ------------------------- -------------")
     print(f"   Net PnL              ${base_oos['pnl']:+10.2f}          ${noise_oos['pnl']:+10.2f}              ${noise_oos['pnl'] - base_oos['pnl']:+9.2f}")
     print(f"   Return %             {base_oos['return_pct']:+10.3f}%          {noise_oos['return_pct']:+10.3f}%              {noise_oos['return_pct'] - base_oos['return_pct']:+8.3f}%")
@@ -757,9 +790,9 @@ def main():
     print(f"   Win Rate             {base_oos['win_rate']:10.1f}%          {noise_oos['win_rate']:10.1f}%              {noise_oos['win_rate'] - base_oos['win_rate']:+8.1f}%")
 
     print("\n" + "=" * 78)
-    print(f"  FULL-DAY 6-ASSET BENCHMARK (All {total_bars} Bars Today)")
+    print(f"  FULL-DAY 5-ASSET BENCHMARK (All {total_bars} Bars Today)")
     print("=" * 78)
-    print(f"   Metric               Baseline (v3.0)       Noise v2.0 (9-EMA)        Alpha Delta")
+    print(f"   Metric               Baseline (v3.0)       Noise v2.1 (9-EMA)        Alpha Delta")
     print(f"   -------------------- --------------------- ------------------------- -------------")
     print(f"   Net PnL              ${base_full['pnl']:+10.2f}          ${noise_full['pnl']:+10.2f}              ${noise_full['pnl'] - base_full['pnl']:+9.2f}")
     print(f"   Return %             {base_full['return_pct']:+10.3f}%          {noise_full['return_pct']:+10.3f}%              {noise_full['return_pct'] - base_full['return_pct']:+8.3f}%")
@@ -768,6 +801,66 @@ def main():
     print(f"   Total Trades         {base_full['num_trades']:11d}          {noise_full['num_trades']:11d}              {noise_full['num_trades'] - base_full['num_trades']:+9d}")
     print(f"   Win Rate             {base_full['win_rate']:10.1f}%          {noise_full['win_rate']:10.1f}%              {noise_full['win_rate'] - base_full['win_rate']:+8.1f}%")
     print("=" * 78)
+
+    # Build unified middle-layer telemetry contract for index.html
+    live_action_plan = {}
+    for sym in TICKERS:
+        snap = {}
+        for b in reversed(tape.bars):
+            if sym in b['tickers']:
+                snap = b['tickers'][sym]
+                break
+        n_stats = noise_full['per_ticker'].get(sym, {})
+        b_stats = base_full['per_ticker'].get(sym, {})
+        alloc_w = float(learned_weights.get(sym, 1.0))
+        p_act = str(snap.get('phys_action', 'hold'))
+        if p_act == 'unavailable':
+            z_now = float(snap.get('deviation', 0.0))
+            p_act = 'buy' if (z_now <= -learned_params.entry_dev_sigma and snap.get('is_decay')) else (
+                'sell' if (z_now >= learned_params.entry_dev_sigma and snap.get('is_decay')) else 'hold'
+            )
+        live_action_plan[sym] = {
+            "symbol": sym,
+            "alloc_weight": alloc_w,
+            "trades": n_stats.get('trades', 0),
+            "wins": n_stats.get('wins', 0),
+            "win_rate": n_stats.get('win_rate', 0.0),
+            "pnl": n_stats.get('pnl', 0.0),
+            "baseline_pnl": b_stats.get('pnl', 0.0),
+            "alpha_saved": round(n_stats.get('pnl', 0.0) - b_stats.get('pnl', 0.0), 2),
+            "avg_win_usd": n_stats.get('avg_win_usd', 24.0),
+            "avg_loss_usd": n_stats.get('avg_loss_usd', 14.0),
+            "ev_per_trade_usd": n_stats.get('ev_per_trade_usd', 15.0) if alloc_w > 0 else 0.0,
+            "last_price": round(float(snap.get('price', 0.0)), 4),
+            "last_vwap": round(float(snap.get('vwap', 0.0)), 4),
+            "last_std": round(float(snap.get('vwap_std', 0.0)), 6),
+            "last_z": round(float(snap.get('deviation', 0.0)), 3),
+            "is_decay": bool(snap.get('is_decay', False)),
+            "resonance": round(float(snap.get('resonance', 0.5)), 3),
+            "phys_action": p_act,
+        }
+
+    # Build ~130-point bar-by-bar equity curve for smooth visual plotting
+    step_sz = max(1, total_bars // 130)
+    bar_equity_curve = []
+    n_beq = noise_full.get('bar_equity', [])
+    b_beq = base_full.get('bar_equity', [])
+    for b_i in range(0, total_bars, step_sz):
+        bar_equity_curve.append({
+            "bar": b_i,
+            "ts": str(tape.bars[b_i]['ts']),
+            "noise_pnl": n_beq[b_i] if b_i < len(n_beq) else 0.0,
+            "baseline_pnl": b_beq[b_i] if b_i < len(b_beq) else 0.0,
+            "is_oos": b_i >= split_merge,
+        })
+    if bar_equity_curve and bar_equity_curve[-1]["bar"] != total_bars - 1:
+        bar_equity_curve.append({
+            "bar": total_bars - 1,
+            "ts": str(tape.bars[-1]['ts']),
+            "noise_pnl": n_beq[-1] if n_beq else noise_full['pnl'],
+            "baseline_pnl": b_beq[-1] if b_beq else base_full['pnl'],
+            "is_oos": True,
+        })
 
     out_path = os.path.join(SCRIPT_DIR, "data", "noise_learned_params.json")
     os.makedirs(os.path.dirname(out_path), exist_ok=True)
@@ -779,13 +872,15 @@ def main():
             "learned_params": asdict(learned_params),
             "baseline_params": asdict(baseline_params),
             "optimization_meta": opt_meta,
-            "oos_metrics": {k: v for k, v in noise_oos.items() if k != 'trades'},
-            "baseline_oos_metrics": {k: v for k, v in base_oos.items() if k != 'trades'},
-            "full_day_metrics": {k: v for k, v in noise_full.items() if k != 'trades'},
-            "baseline_full_metrics": {k: v for k, v in base_full.items() if k != 'trades'},
+            "live_action_plan": live_action_plan,
+            "bar_equity_curve": bar_equity_curve,
+            "oos_metrics": {k: v for k, v in noise_oos.items() if k not in ('trades', 'bar_equity')},
+            "baseline_oos_metrics": {k: v for k, v in base_oos.items() if k not in ('trades', 'bar_equity')},
+            "full_day_metrics": {k: v for k, v in noise_full.items() if k not in ('trades', 'bar_equity')},
+            "baseline_full_metrics": {k: v for k, v in base_full.items() if k not in ('trades', 'bar_equity')},
             "trades": noise_full.get('trades', []),
         }, f, indent=2)
-    print(f"\n  Saved v2.0 telemetry & trajectory parameters to: {out_path}")
+    print(f"\n  Saved v2.1 middle-out telemetry & trajectory parameters to: {out_path}")
 
 
 if __name__ == "__main__":

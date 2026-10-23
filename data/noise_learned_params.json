@@ -1,16 +1,16 @@
 {
-  "timestamp": "2026-10-23T21:28:19Z",
-  "total_bars": 1289,
-  "split_merge_bar": 773,
+  "timestamp": "2026-10-23T22:24:52Z",
+  "total_bars": 1345,
+  "split_merge_bar": 807,
   "learned_params": {
-    "entry_dev_sigma": 1.954216320902857,
-    "stop_loss_sigma": 4.432534896329396,
-    "tsl_base": 0.020973196255956623,
-    "breakeven_pct": 0.0031518162287684365,
-    "min_confidence": 0.7169381007040323,
-    "take_profit_pct": 0.021040756218295358,
-    "max_hold_min": 86.74059197228195,
-    "exit_vwap_z": 0.2935694460162563
+    "entry_dev_sigma": 2.8768211386278133,
+    "stop_loss_sigma": 4.279466491940801,
+    "tsl_base": 0.022494371406339593,
+    "breakeven_pct": 0.005313401745068129,
+    "min_confidence": 0.7121382185185594,
+    "take_profit_pct": 0.019866573400782555,
+    "max_hold_min": 89.5610430850154,
+    "exit_vwap_z": 0.22049999999999997
   },
   "baseline_params": {
     "entry_dev_sigma": 1.5,
@@ -24,435 +24,1528 @@
   },
   "optimization_meta": {
     "steps": 20,
-    "initial_loss": 1164.14,
-    "final_merge_loss": -14.98,
+    "initial_loss": 1196.18,
+    "final_merge_loss": 14.12,
     "trajectory": [
       {
         "step": 1,
         "phase": "BOOST",
-        "loss": 1164.14,
-        "pnl": -776.09,
-        "dd_pct": 0.7761,
+        "loss": 1196.18,
+        "pnl": -797.45,
+        "dd_pct": 0.7975,
         "trades": 50
       },
       {
         "step": 2,
         "phase": "BOOST",
-        "loss": 678.33,
-        "pnl": -452.22,
-        "dd_pct": 0.4522,
-        "trades": 31
+        "loss": 608.97,
+        "pnl": -405.98,
+        "dd_pct": 0.406,
+        "trades": 30
       },
       {
         "step": 3,
         "phase": "BOOST",
-        "loss": 402.37,
-        "pnl": -267.01,
-        "dd_pct": 0.2707,
-        "trades": 22
+        "loss": 391.11,
+        "pnl": -259.49,
+        "dd_pct": 0.2632,
+        "trades": 20
       },
       {
         "step": 4,
         "phase": "BOOST",
-        "loss": 109.91,
-        "pnl": -42.92,
-        "dd_pct": 0.044,
-        "trades": 4
+        "loss": 79.48,
+        "pnl": -52.05,
+        "dd_pct": 0.0549,
+        "trades": 7
       },
       {
         "step": 5,
         "phase": "CUT",
-        "loss": 225.0,
-        "pnl": 0.0,
-        "dd_pct": 0.0,
-        "trades": 0
+        "loss": 50.45,
+        "pnl": -29.25,
+        "dd_pct": 0.0424,
+        "trades": 7
       },
       {
         "step": 6,
         "phase": "CUT",
-        "loss": 225.0,
-        "pnl": 0.0,
-        "dd_pct": 0.0,
-        "trades": 0
+        "loss": 65.12,
+        "pnl": -38.18,
+        "dd_pct": 0.0539,
+        "trades": 7
       },
       {
         "step": 7,
         "phase": "CUT",
-        "loss": 130.29,
-        "pnl": -26.86,
-        "dd_pct": 0.0269,
-        "trades": 3
+        "loss": 72.33,
+        "pnl": -42.83,
+        "dd_pct": 0.059,
+        "trades": 8
       },
       {
         "step": 8,
         "phase": "CUT",
-        "loss": 44.02,
-        "pnl": -21.49,
-        "dd_pct": 0.045,
-        "trades": 7
+        "loss": 82.43,
+        "pnl": -49.56,
+        "dd_pct": 0.0657,
+        "trades": 8
       },
       {
         "step": 9,
         "phase": "CUT",
-        "loss": 91.21,
-        "pnl": -51.65,
-        "dd_pct": 0.0791,
-        "trades": 11
+        "loss": 102.22,
+        "pnl": -62.76,
+        "dd_pct": 0.0789,
+        "trades": 8
       },
       {
         "step": 10,
         "phase": "CUT",
-        "loss": 70.0,
-        "pnl": -33.28,
-        "dd_pct": 0.0734,
-        "trades": 9
+        "loss": 63.18,
+        "pnl": -36.73,
+        "dd_pct": 0.0529,
+        "trades": 8
       },
       {
         "step": 11,
         "phase": "CUT",
-        "loss": 75.11,
-        "pnl": -50.07,
-        "dd_pct": 0.0501,
-        "trades": 7
+        "loss": 34.0,
+        "pnl": -15.61,
+        "dd_pct": 0.0368,
+        "trades": 8
       },
       {
         "step": 12,
         "phase": "CUT",
-        "loss": 80.77,
-        "pnl": -53.85,
-        "dd_pct": 0.0538,
-        "trades": 7
+        "loss": 34.08,
+        "pnl": -15.69,
+        "dd_pct": 0.0368,
+        "trades": 9
       },
       {
         "step": 13,
         "phase": "CUT",
-        "loss": 44.47,
-        "pnl": -29.02,
-        "dd_pct": 0.0309,
-        "trades": 6
+        "loss": 26.57,
+        "pnl": -5.55,
+        "dd_pct": 0.042,
+        "trades": 9
       },
       {
         "step": 14,
         "phase": "CUT",
-        "loss": 32.88,
-        "pnl": -21.15,
-        "dd_pct": 0.0235,
-        "trades": 6
+        "loss": 39.0,
+        "pnl": -17.98,
+        "dd_pct": 0.042,
+        "trades": 8
       },
       {
         "step": 15,
         "phase": "CUT",
-        "loss": 23.46,
-        "pnl": -9.16,
-        "dd_pct": 0.0286,
-        "trades": 7
+        "loss": 68.79,
+        "pnl": -39.08,
+        "dd_pct": 0.0594,
+        "trades": 8
       },
       {
         "step": 16,
         "phase": "CUT",
-        "loss": 26.46,
-        "pnl": -10.47,
-        "dd_pct": 0.032,
-        "trades": 7
+        "loss": 71.11,
+        "pnl": -40.63,
+        "dd_pct": 0.061,
+        "trades": 8
       },
       {
         "step": 17,
         "phase": "CUT",
-        "loss": 23.89,
-        "pnl": -8.61,
-        "dd_pct": 0.0306,
-        "trades": 7
+        "loss": 71.11,
+        "pnl": -40.63,
+        "dd_pct": 0.061,
+        "trades": 8
       },
       {
         "step": 18,
         "phase": "CUT",
-        "loss": 18.72,
-        "pnl": -5.56,
-        "dd_pct": 0.0263,
+        "loss": 94.49,
+        "pnl": -56.22,
+        "dd_pct": 0.0765,
         "trades": 7
       },
       {
         "step": 19,
         "phase": "CUT",
-        "loss": 48.36,
-        "pnl": -26.49,
-        "dd_pct": 0.0437,
+        "loss": 94.49,
+        "pnl": -56.22,
+        "dd_pct": 0.0765,
         "trades": 7
       },
       {
         "step": 20,
         "phase": "CUT",
-        "loss": 47.39,
-        "pnl": -25.82,
-        "dd_pct": 0.0431,
+        "loss": 94.36,
+        "pnl": -56.13,
+        "dd_pct": 0.0765,
         "trades": 7
       }
     ],
     "sensitivity": {
-      "ENTRY_DEVIATION_SIGMA": 4.6,
-      "STOP_LOSS_SIGMA": 14.0,
-      "TSL_BASE_THRESHOLD": 7.2,
-      "BREAKEVEN_THRESHOLD": 17.6,
+      "ENTRY_DEVIATION_SIGMA": 29.2,
+      "STOP_LOSS_SIGMA": 9.6,
+      "TSL_BASE_THRESHOLD": 4.6,
+      "BREAKEVEN_THRESHOLD": 1.7,
       "MIN_CONFIDENCE": 100.0,
-      "TAKE_PROFIT_PCT": 2.2,
-      "MAX_HOLD_MINUTES": 34.6,
-      "EXIT_VWAP_Z_TARGET": 5.6
+      "TAKE_PROFIT_PCT": 1.0,
+      "MAX_HOLD_MINUTES": 17.2,
+      "EXIT_VWAP_Z_TARGET": 2.0
     },
     "asset_weights": {
       "BTC-USD": 0.0,
-      "ETH-USD": 1.4,
-      "SOL-USD": 1.4,
-      "AVAX-USD": 1.0,
-      "LINK-USD": 1.4
+      "ETH-USD": 1.55,
+      "SOL-USD": 1.55,
+      "AVAX-USD": 0.0,
+      "LINK-USD": 1.55
     }
   },
+  "live_action_plan": {
+    "BTC-USD": {
+      "symbol": "BTC-USD",
+      "alloc_weight": 0.0,
+      "trades": 0,
+      "wins": 0,
+      "win_rate": 0.0,
+      "pnl": 0,
+      "baseline_pnl": -398.98,
+      "alpha_saved": 398.98,
+      "avg_win_usd": 24.0,
+      "avg_loss_usd": 14.0,
+      "ev_per_trade_usd": 0.0,
+      "last_price": 81214.5938,
+      "last_vwap": 81503.0389,
+      "last_std": 32.485977,
+      "last_z": -8.879,
+      "is_decay": false,
+      "resonance": 0.0,
+      "phys_action": "hold"
+    },
+    "ETH-USD": {
+      "symbol": "ETH-USD",
+      "alloc_weight": 1.55,
+      "trades": 2,
+      "wins": 2,
+      "win_rate": 100.0,
+      "pnl": 8.72,
+      "baseline_pnl": -356.46,
+      "alpha_saved": 365.18,
+      "avg_win_usd": 4.36,
+      "avg_loss_usd": 14.0,
+      "ev_per_trade_usd": 4.36,
+      "last_price": 2392.47,
+      "last_vwap": 2399.5809,
+      "last_std": 2.074211,
+      "last_z": -3.428,
+      "is_decay": true,
+      "resonance": 0.02,
+      "phys_action": "buy"
+    },
+    "SOL-USD": {
+      "symbol": "SOL-USD",
+      "alloc_weight": 1.55,
+      "trades": 5,
+      "wins": 4,
+      "win_rate": 80.0,
+      "pnl": 84.44,
+      "baseline_pnl": -538.58,
+      "alpha_saved": 623.02,
+      "avg_win_usd": 30.87,
+      "avg_loss_usd": 39.03,
+      "ev_per_trade_usd": 16.89,
+      "last_price": 103.52,
+      "last_vwap": 104.1795,
+      "last_std": 0.086372,
+      "last_z": -7.636,
+      "is_decay": false,
+      "resonance": 0.02,
+      "phys_action": "hold"
+    },
+    "AVAX-USD": {
+      "symbol": "AVAX-USD",
+      "alloc_weight": 0.0,
+      "trades": 0,
+      "wins": 0,
+      "win_rate": 0.0,
+      "pnl": 0,
+      "baseline_pnl": -404.46,
+      "alpha_saved": 404.46,
+      "avg_win_usd": 24.0,
+      "avg_loss_usd": 14.0,
+      "ev_per_trade_usd": 0.0,
+      "last_price": 9.087,
+      "last_vwap": 9.1297,
+      "last_std": 0.013891,
+      "last_z": -3.074,
+      "is_decay": false,
+      "resonance": 0.02,
+      "phys_action": "hold"
+    },
+    "LINK-USD": {
+      "symbol": "LINK-USD",
+      "alloc_weight": 1.55,
+      "trades": 4,
+      "wins": 3,
+      "win_rate": 75.0,
+      "pnl": 47.97,
+      "baseline_pnl": -543.19,
+      "alpha_saved": 591.16,
+      "avg_win_usd": 20.81,
+      "avg_loss_usd": 14.45,
+      "ev_per_trade_usd": 11.99,
+      "last_price": 11.895,
+      "last_vwap": 12.0419,
+      "last_std": 0.017622,
+      "last_z": -8.333,
+      "is_decay": false,
+      "resonance": 0.02,
+      "phys_action": "hold"
+    }
+  },
+  "bar_equity_curve": [
+    {
+      "bar": 0,
+      "ts": "2026-10-23 00:00:00+00:00",
+      "noise_pnl": 0.0,
+      "baseline_pnl": 0.0,
+      "is_oos": false
+    },
+    {
+      "bar": 10,
+      "ts": "2026-10-23 00:10:00+00:00",
+      "noise_pnl": 0.0,
+      "baseline_pnl": 0.0,
+      "is_oos": false
+    },
+    {
+      "bar": 20,
+      "ts": "2026-10-23 00:20:00+00:00",
+      "noise_pnl": 0.0,
+      "baseline_pnl": 0.0,
+      "is_oos": false
+    },
+    {
+      "bar": 30,
+      "ts": "2026-10-23 00:30:00+00:00",
+      "noise_pnl": 0.0,
+      "baseline_pnl": 0.0,
+      "is_oos": false
+    },
+    {
+      "bar": 40,
+      "ts": "2026-10-23 00:40:00+00:00",
+      "noise_pnl": 0.0,
+      "baseline_pnl": -38.21,
+      "is_oos": false
+    },
+    {
+      "bar": 50,
+      "ts": "2026-10-23 00:50:00+00:00",
+      "noise_pnl": 0.0,
+      "baseline_pnl": -100.19,
+      "is_oos": false
+    },
+    {
+      "bar": 60,
+      "ts": "2026-10-23 01:00:00+00:00",
+      "noise_pnl": 0.0,
+      "baseline_pnl": -100.19,
+      "is_oos": false
+    },
+    {
+      "bar": 70,
+      "ts": "2026-10-23 01:10:00+00:00",
+      "noise_pnl": 2.25,
+      "baseline_pnl": -116.85,
+      "is_oos": false
+    },
+    {
+      "bar": 80,
+      "ts": "2026-10-23 01:20:00+00:00",
+      "noise_pnl": 2.25,
+      "baseline_pnl": -138.62,
+      "is_oos": false
+    },
+    {
+      "bar": 90,
+      "ts": "2026-10-23 01:30:00+00:00",
+      "noise_pnl": 2.25,
+      "baseline_pnl": -165.84,
+      "is_oos": false
+    },
+    {
+      "bar": 100,
+      "ts": "2026-10-23 01:40:00+00:00",
+      "noise_pnl": 2.25,
+      "baseline_pnl": -167.87,
+      "is_oos": false
+    },
+    {
+      "bar": 110,
+      "ts": "2026-10-23 01:50:00+00:00",
+      "noise_pnl": 2.25,
+      "baseline_pnl": -251.98,
+      "is_oos": false
+    },
+    {
+      "bar": 120,
+      "ts": "2026-10-23 02:00:00+00:00",
+      "noise_pnl": 39.3,
+      "baseline_pnl": -278.28,
+      "is_oos": false
+    },
+    {
+      "bar": 130,
+      "ts": "2026-10-23 02:10:00+00:00",
+      "noise_pnl": 39.3,
+      "baseline_pnl": -278.28,
+      "is_oos": false
+    },
+    {
+      "bar": 140,
+      "ts": "2026-10-23 02:20:00+00:00",
+      "noise_pnl": 39.3,
+      "baseline_pnl": -307.13,
+      "is_oos": false
+    },
+    {
+      "bar": 150,
+      "ts": "2026-10-23 02:30:00+00:00",
+      "noise_pnl": 39.3,
+      "baseline_pnl": -349.22,
+      "is_oos": false
+    },
+    {
+      "bar": 160,
+      "ts": "2026-10-23 02:40:00+00:00",
+      "noise_pnl": 39.3,
+      "baseline_pnl": -385.88,
+      "is_oos": false
+    },
+    {
+      "bar": 170,
+      "ts": "2026-10-23 02:50:00+00:00",
+      "noise_pnl": 39.3,
+      "baseline_pnl": -385.88,
+      "is_oos": false
+    },
+    {
+      "bar": 180,
+      "ts": "2026-10-23 03:00:00+00:00",
+      "noise_pnl": 39.3,
+      "baseline_pnl": -385.88,
+      "is_oos": false
+    },
+    {
+      "bar": 190,
+      "ts": "2026-10-23 03:10:00+00:00",
+      "noise_pnl": 39.3,
+      "baseline_pnl": -411.02,
+      "is_oos": false
+    },
+    {
+      "bar": 200,
+      "ts": "2026-10-23 03:20:00+00:00",
+      "noise_pnl": 39.3,
+      "baseline_pnl": -411.02,
+      "is_oos": false
+    },
+    {
+      "bar": 210,
+      "ts": "2026-10-23 03:30:00+00:00",
+      "noise_pnl": 64.62,
+      "baseline_pnl": -429.71,
+      "is_oos": false
+    },
+    {
+      "bar": 220,
+      "ts": "2026-10-23 03:40:00+00:00",
+      "noise_pnl": 64.62,
+      "baseline_pnl": -429.71,
+      "is_oos": false
+    },
+    {
+      "bar": 230,
+      "ts": "2026-10-23 03:50:00+00:00",
+      "noise_pnl": 64.62,
+      "baseline_pnl": -481.19,
+      "is_oos": false
+    },
+    {
+      "bar": 240,
+      "ts": "2026-10-23 04:00:00+00:00",
+      "noise_pnl": 64.62,
+      "baseline_pnl": -526.6,
+      "is_oos": false
+    },
+    {
+      "bar": 250,
+      "ts": "2026-10-23 04:10:00+00:00",
+      "noise_pnl": 64.62,
+      "baseline_pnl": -526.6,
+      "is_oos": false
+    },
+    {
+      "bar": 260,
+      "ts": "2026-10-23 04:20:00+00:00",
+      "noise_pnl": 68.85,
+      "baseline_pnl": -527.7,
+      "is_oos": false
+    },
+    {
+      "bar": 270,
+      "ts": "2026-10-23 04:30:00+00:00",
+      "noise_pnl": 68.85,
+      "baseline_pnl": -522.52,
+      "is_oos": false
+    },
+    {
+      "bar": 280,
+      "ts": "2026-10-23 04:40:00+00:00",
+      "noise_pnl": 68.85,
+      "baseline_pnl": -559.33,
+      "is_oos": false
+    },
+    {
+      "bar": 290,
+      "ts": "2026-10-23 04:50:00+00:00",
+      "noise_pnl": 79.02,
+      "baseline_pnl": -559.33,
+      "is_oos": false
+    },
+    {
+      "bar": 300,
+      "ts": "2026-10-23 05:00:00+00:00",
+      "noise_pnl": 79.02,
+      "baseline_pnl": -585.72,
+      "is_oos": false
+    },
+    {
+      "bar": 310,
+      "ts": "2026-10-23 05:10:00+00:00",
+      "noise_pnl": 79.02,
+      "baseline_pnl": -598.59,
+      "is_oos": false
+    },
+    {
+      "bar": 320,
+      "ts": "2026-10-23 05:20:00+00:00",
+      "noise_pnl": 79.02,
+      "baseline_pnl": -598.59,
+      "is_oos": false
+    },
+    {
+      "bar": 330,
+      "ts": "2026-10-23 05:30:00+00:00",
+      "noise_pnl": 79.02,
+      "baseline_pnl": -598.59,
+      "is_oos": false
+    },
+    {
+      "bar": 340,
+      "ts": "2026-10-23 05:40:00+00:00",
+      "noise_pnl": 79.02,
+      "baseline_pnl": -622.52,
+      "is_oos": false
+    },
+    {
+      "bar": 350,
+      "ts": "2026-10-23 05:50:00+00:00",
+      "noise_pnl": 79.02,
+      "baseline_pnl": -650.15,
+      "is_oos": false
+    },
+    {
+      "bar": 360,
+      "ts": "2026-10-23 06:00:00+00:00",
+      "noise_pnl": 79.02,
+      "baseline_pnl": -650.15,
+      "is_oos": false
+    },
+    {
+      "bar": 370,
+      "ts": "2026-10-23 06:10:00+00:00",
+      "noise_pnl": 79.02,
+      "baseline_pnl": -656.51,
+      "is_oos": false
+    },
+    {
+      "bar": 380,
+      "ts": "2026-10-23 06:20:00+00:00",
+      "noise_pnl": 79.02,
+      "baseline_pnl": -723.11,
+      "is_oos": false
+    },
+    {
+      "bar": 390,
+      "ts": "2026-10-23 06:30:00+00:00",
+      "noise_pnl": 79.02,
+      "baseline_pnl": -763.4,
+      "is_oos": false
+    },
+    {
+      "bar": 400,
+      "ts": "2026-10-23 06:40:00+00:00",
+      "noise_pnl": 79.02,
+      "baseline_pnl": -763.4,
+      "is_oos": false
+    },
+    {
+      "bar": 410,
+      "ts": "2026-10-23 06:50:00+00:00",
+      "noise_pnl": 40.0,
+      "baseline_pnl": -785.83,
+      "is_oos": false
+    },
+    {
+      "bar": 420,
+      "ts": "2026-10-23 07:00:00+00:00",
+      "noise_pnl": 40.0,
+      "baseline_pnl": -785.83,
+      "is_oos": false
+    },
+    {
+      "bar": 430,
+      "ts": "2026-10-23 07:10:00+00:00",
+      "noise_pnl": 40.0,
+      "baseline_pnl": -804.49,
+      "is_oos": false
+    },
+    {
+      "bar": 440,
+      "ts": "2026-10-23 07:20:00+00:00",
+      "noise_pnl": 40.0,
+      "baseline_pnl": -804.49,
+      "is_oos": false
+    },
+    {
+      "bar": 450,
+      "ts": "2026-10-23 07:30:00+00:00",
+      "noise_pnl": 40.0,
+      "baseline_pnl": -806.76,
+      "is_oos": false
+    },
+    {
+      "bar": 460,
+      "ts": "2026-10-23 07:40:00+00:00",
+      "noise_pnl": 40.0,
+      "baseline_pnl": -806.76,
+      "is_oos": false
+    },
+    {
+      "bar": 470,
+      "ts": "2026-10-23 07:50:00+00:00",
+      "noise_pnl": 40.0,
+      "baseline_pnl": -822.85,
+      "is_oos": false
+    },
+    {
+      "bar": 480,
+      "ts": "2026-10-23 08:00:00+00:00",
+      "noise_pnl": 40.0,
+      "baseline_pnl": -822.85,
+      "is_oos": false
+    },
+    {
+      "bar": 490,
+      "ts": "2026-10-23 08:10:00+00:00",
+      "noise_pnl": 40.0,
+      "baseline_pnl": -845.53,
+      "is_oos": false
+    },
+    {
+      "bar": 500,
+      "ts": "2026-10-23 08:20:00+00:00",
+      "noise_pnl": 40.0,
+      "baseline_pnl": -934.75,
+      "is_oos": false
+    },
+    {
+      "bar": 510,
+      "ts": "2026-10-23 08:30:00+00:00",
+      "noise_pnl": 40.0,
+      "baseline_pnl": -934.75,
+      "is_oos": false
+    },
+    {
+      "bar": 520,
+      "ts": "2026-10-23 08:40:00+00:00",
+      "noise_pnl": 40.0,
+      "baseline_pnl": -934.75,
+      "is_oos": false
+    },
+    {
+      "bar": 530,
+      "ts": "2026-10-23 08:50:00+00:00",
+      "noise_pnl": 40.0,
+      "baseline_pnl": -934.75,
+      "is_oos": false
+    },
+    {
+      "bar": 540,
+      "ts": "2026-10-23 09:00:00+00:00",
+      "noise_pnl": 40.0,
+      "baseline_pnl": -974.64,
+      "is_oos": false
+    },
+    {
+      "bar": 550,
+      "ts": "2026-10-23 09:10:00+00:00",
+      "noise_pnl": 40.0,
+      "baseline_pnl": -991.59,
+      "is_oos": false
+    },
+    {
+      "bar": 560,
+      "ts": "2026-10-23 09:20:00+00:00",
+      "noise_pnl": 40.0,
+      "baseline_pnl": -991.59,
+      "is_oos": false
+    },
+    {
+      "bar": 570,
+      "ts": "2026-10-23 09:30:00+00:00",
+      "noise_pnl": 66.96,
+      "baseline_pnl": -962.89,
+      "is_oos": false
+    },
+    {
+      "bar": 580,
+      "ts": "2026-10-23 09:40:00+00:00",
+      "noise_pnl": 66.96,
+      "baseline_pnl": -962.89,
+      "is_oos": false
+    },
+    {
+      "bar": 590,
+      "ts": "2026-10-23 09:50:00+00:00",
+      "noise_pnl": 66.96,
+      "baseline_pnl": -962.89,
+      "is_oos": false
+    },
+    {
+      "bar": 600,
+      "ts": "2026-10-23 10:00:00+00:00",
+      "noise_pnl": 66.96,
+      "baseline_pnl": -967.1,
+      "is_oos": false
+    },
+    {
+      "bar": 610,
+      "ts": "2026-10-23 10:10:00+00:00",
+      "noise_pnl": 66.96,
+      "baseline_pnl": -1019.15,
+      "is_oos": false
+    },
+    {
+      "bar": 620,
+      "ts": "2026-10-23 10:20:00+00:00",
+      "noise_pnl": 66.96,
+      "baseline_pnl": -1044.35,
+      "is_oos": false
+    },
+    {
+      "bar": 630,
+      "ts": "2026-10-23 10:30:00+00:00",
+      "noise_pnl": 66.96,
+      "baseline_pnl": -1044.35,
+      "is_oos": false
+    },
+    {
+      "bar": 640,
+      "ts": "2026-10-23 10:40:00+00:00",
+      "noise_pnl": 66.96,
+      "baseline_pnl": -1044.35,
+      "is_oos": false
+    },
+    {
+      "bar": 650,
+      "ts": "2026-10-23 10:50:00+00:00",
+      "noise_pnl": 66.96,
+      "baseline_pnl": -1074.74,
+      "is_oos": false
+    },
+    {
+      "bar": 660,
+      "ts": "2026-10-23 11:00:00+00:00",
+      "noise_pnl": 66.96,
+      "baseline_pnl": -1118.69,
+      "is_oos": false
+    },
+    {
+      "bar": 670,
+      "ts": "2026-10-23 11:10:00+00:00",
+      "noise_pnl": 66.96,
+      "baseline_pnl": -1118.69,
+      "is_oos": false
+    },
+    {
+      "bar": 680,
+      "ts": "2026-10-23 11:20:00+00:00",
+      "noise_pnl": 66.96,
+      "baseline_pnl": -1118.69,
+      "is_oos": false
+    },
+    {
+      "bar": 690,
+      "ts": "2026-10-23 11:30:00+00:00",
+      "noise_pnl": 66.96,
+      "baseline_pnl": -1118.69,
+      "is_oos": false
+    },
+    {
+      "bar": 700,
+      "ts": "2026-10-23 11:40:00+00:00",
+      "noise_pnl": 66.96,
+      "baseline_pnl": -1108.47,
+      "is_oos": false
+    },
+    {
+      "bar": 710,
+      "ts": "2026-10-23 11:50:00+00:00",
+      "noise_pnl": 66.96,
+      "baseline_pnl": -1109.78,
+      "is_oos": false
+    },
+    {
+      "bar": 720,
+      "ts": "2026-10-23 12:00:00+00:00",
+      "noise_pnl": 66.96,
+      "baseline_pnl": -1109.78,
+      "is_oos": false
+    },
+    {
+      "bar": 730,
+      "ts": "2026-10-23 12:10:00+00:00",
+      "noise_pnl": 66.96,
+      "baseline_pnl": -1152.57,
+      "is_oos": false
+    },
+    {
+      "bar": 740,
+      "ts": "2026-10-23 12:20:00+00:00",
+      "noise_pnl": 66.96,
+      "baseline_pnl": -1152.57,
+      "is_oos": false
+    },
+    {
+      "bar": 750,
+      "ts": "2026-10-23 12:30:00+00:00",
+      "noise_pnl": 66.96,
+      "baseline_pnl": -1153.0,
+      "is_oos": false
+    },
+    {
+      "bar": 760,
+      "ts": "2026-10-23 12:40:00+00:00",
+      "noise_pnl": 66.96,
+      "baseline_pnl": -1153.0,
+      "is_oos": false
+    },
+    {
+      "bar": 770,
+      "ts": "2026-10-23 12:50:00+00:00",
+      "noise_pnl": 66.96,
+      "baseline_pnl": -1170.1,
+      "is_oos": false
+    },
+    {
+      "bar": 780,
+      "ts": "2026-10-23 13:00:00+00:00",
+      "noise_pnl": 52.51,
+      "baseline_pnl": -1191.34,
+      "is_oos": false
+    },
+    {
+      "bar": 790,
+      "ts": "2026-10-23 13:10:00+00:00",
+      "noise_pnl": 52.51,
+      "baseline_pnl": -1224.23,
+      "is_oos": false
+    },
+    {
+      "bar": 800,
+      "ts": "2026-10-23 13:20:00+00:00",
+      "noise_pnl": 52.51,
+      "baseline_pnl": -1230.8,
+      "is_oos": false
+    },
+    {
+      "bar": 810,
+      "ts": "2026-10-23 13:30:00+00:00",
+      "noise_pnl": 52.51,
+      "baseline_pnl": -1304.55,
+      "is_oos": true
+    },
+    {
+      "bar": 820,
+      "ts": "2026-10-23 13:40:00+00:00",
+      "noise_pnl": 52.51,
+      "baseline_pnl": -1326.93,
+      "is_oos": true
+    },
+    {
+      "bar": 830,
+      "ts": "2026-10-23 13:50:00+00:00",
+      "noise_pnl": 52.51,
+      "baseline_pnl": -1326.93,
+      "is_oos": true
+    },
+    {
+      "bar": 840,
+      "ts": "2026-10-23 14:00:00+00:00",
+      "noise_pnl": 52.51,
+      "baseline_pnl": -1326.93,
+      "is_oos": true
+    },
+    {
+      "bar": 850,
+      "ts": "2026-10-23 14:10:00+00:00",
+      "noise_pnl": 52.51,
+      "baseline_pnl": -1354.35,
+      "is_oos": true
+    },
+    {
+      "bar": 860,
+      "ts": "2026-10-23 14:20:00+00:00",
+      "noise_pnl": 121.45,
+      "baseline_pnl": -1314.39,
+      "is_oos": true
+    },
+    {
+      "bar": 870,
+      "ts": "2026-10-23 14:30:00+00:00",
+      "noise_pnl": 121.45,
+      "baseline_pnl": -1406.13,
+      "is_oos": true
+    },
+    {
+      "bar": 880,
+      "ts": "2026-10-23 14:40:00+00:00",
+      "noise_pnl": 121.45,
+      "baseline_pnl": -1390.34,
+      "is_oos": true
+    },
+    {
+      "bar": 890,
+      "ts": "2026-10-23 14:50:00+00:00",
+      "noise_pnl": 121.45,
+      "baseline_pnl": -1390.34,
+      "is_oos": true
+    },
+    {
+      "bar": 900,
+      "ts": "2026-10-23 15:00:00+00:00",
+      "noise_pnl": 121.45,
+      "baseline_pnl": -1331.81,
+      "is_oos": true
+    },
+    {
+      "bar": 910,
+      "ts": "2026-10-23 15:10:00+00:00",
+      "noise_pnl": 121.45,
+      "baseline_pnl": -1388.31,
+      "is_oos": true
+    },
+    {
+      "bar": 920,
+      "ts": "2026-10-23 15:20:00+00:00",
+      "noise_pnl": 121.45,
+      "baseline_pnl": -1388.31,
+      "is_oos": true
+    },
+    {
+      "bar": 930,
+      "ts": "2026-10-23 15:30:00+00:00",
+      "noise_pnl": 121.45,
+      "baseline_pnl": -1432.09,
+      "is_oos": true
+    },
+    {
+      "bar": 940,
+      "ts": "2026-10-23 15:40:00+00:00",
+      "noise_pnl": 121.45,
+      "baseline_pnl": -1464.35,
+      "is_oos": true
+    },
+    {
+      "bar": 950,
+      "ts": "2026-10-23 15:50:00+00:00",
+      "noise_pnl": 121.45,
+      "baseline_pnl": -1465.44,
+      "is_oos": true
+    },
+    {
+      "bar": 960,
+      "ts": "2026-10-23 16:00:00+00:00",
+      "noise_pnl": 121.45,
+      "baseline_pnl": -1486.57,
+      "is_oos": true
+    },
+    {
+      "bar": 970,
+      "ts": "2026-10-23 16:10:00+00:00",
+      "noise_pnl": 121.45,
+      "baseline_pnl": -1508.3,
+      "is_oos": true
+    },
+    {
+      "bar": 980,
+      "ts": "2026-10-23 16:20:00+00:00",
+      "noise_pnl": 121.45,
+      "baseline_pnl": -1532.09,
+      "is_oos": true
+    },
+    {
+      "bar": 990,
+      "ts": "2026-10-23 16:30:00+00:00",
+      "noise_pnl": 121.45,
+      "baseline_pnl": -1574.26,
+      "is_oos": true
+    },
+    {
+      "bar": 1000,
+      "ts": "2026-10-23 16:40:00+00:00",
+      "noise_pnl": 136.64,
+      "baseline_pnl": -1636.87,
+      "is_oos": true
+    },
+    {
+      "bar": 1010,
+      "ts": "2026-10-23 16:50:00+00:00",
+      "noise_pnl": 136.64,
+      "baseline_pnl": -1654.91,
+      "is_oos": true
+    },
+    {
+      "bar": 1020,
+      "ts": "2026-10-23 17:00:00+00:00",
+      "noise_pnl": 136.64,
+      "baseline_pnl": -1654.91,
+      "is_oos": true
+    },
+    {
+      "bar": 1030,
+      "ts": "2026-10-23 17:10:00+00:00",
+      "noise_pnl": 136.64,
+      "baseline_pnl": -1687.46,
+      "is_oos": true
+    },
+    {
+      "bar": 1040,
+      "ts": "2026-10-23 17:20:00+00:00",
+      "noise_pnl": 136.64,
+      "baseline_pnl": -1704.49,
+      "is_oos": true
+    },
+    {
+      "bar": 1050,
+      "ts": "2026-10-23 17:30:00+00:00",
+      "noise_pnl": 136.64,
+      "baseline_pnl": -1712.41,
+      "is_oos": true
+    },
+    {
+      "bar": 1060,
+      "ts": "2026-10-23 17:40:00+00:00",
+      "noise_pnl": 136.64,
+      "baseline_pnl": -1730.03,
+      "is_oos": true
+    },
+    {
+      "bar": 1070,
+      "ts": "2026-10-23 17:50:00+00:00",
+      "noise_pnl": 136.64,
+      "baseline_pnl": -1731.06,
+      "is_oos": true
+    },
+    {
+      "bar": 1080,
+      "ts": "2026-10-23 18:00:00+00:00",
+      "noise_pnl": 136.64,
+      "baseline_pnl": -1771.66,
+      "is_oos": true
+    },
+    {
+      "bar": 1090,
+      "ts": "2026-10-23 18:10:00+00:00",
+      "noise_pnl": 136.64,
+      "baseline_pnl": -1774.36,
+      "is_oos": true
+    },
+    {
+      "bar": 1100,
+      "ts": "2026-10-23 18:20:00+00:00",
+      "noise_pnl": 136.64,
+      "baseline_pnl": -1780.02,
+      "is_oos": true
+    },
+    {
+      "bar": 1110,
+      "ts": "2026-10-23 18:30:00+00:00",
+      "noise_pnl": 136.64,
+      "baseline_pnl": -1806.71,
+      "is_oos": true
+    },
+    {
+      "bar": 1120,
+      "ts": "2026-10-23 18:40:00+00:00",
+      "noise_pnl": 136.64,
+      "baseline_pnl": -1806.71,
+      "is_oos": true
+    },
+    {
+      "bar": 1130,
+      "ts": "2026-10-23 18:50:00+00:00",
+      "noise_pnl": 141.13,
+      "baseline_pnl": -1826.75,
+      "is_oos": true
+    },
+    {
+      "bar": 1140,
+      "ts": "2026-10-23 19:00:00+00:00",
+      "noise_pnl": 141.13,
+      "baseline_pnl": -1872.8,
+      "is_oos": true
+    },
+    {
+      "bar": 1150,
+      "ts": "2026-10-23 19:10:00+00:00",
+      "noise_pnl": 141.13,
+      "baseline_pnl": -1929.0,
+      "is_oos": true
+    },
+    {
+      "bar": 1160,
+      "ts": "2026-10-23 19:20:00+00:00",
+      "noise_pnl": 141.13,
+      "baseline_pnl": -1958.53,
+      "is_oos": true
+    },
+    {
+      "bar": 1170,
+      "ts": "2026-10-23 19:30:00+00:00",
+      "noise_pnl": 141.13,
+      "baseline_pnl": -1958.53,
+      "is_oos": true
+    },
+    {
+      "bar": 1180,
+      "ts": "2026-10-23 19:40:00+00:00",
+      "noise_pnl": 141.13,
+      "baseline_pnl": -1958.53,
+      "is_oos": true
+    },
+    {
+      "bar": 1190,
+      "ts": "2026-10-23 19:50:00+00:00",
+      "noise_pnl": 141.13,
+      "baseline_pnl": -1967.14,
+      "is_oos": true
+    },
+    {
+      "bar": 1200,
+      "ts": "2026-10-23 20:00:00+00:00",
+      "noise_pnl": 141.13,
+      "baseline_pnl": -2024.58,
+      "is_oos": true
+    },
+    {
+      "bar": 1210,
+      "ts": "2026-10-23 20:10:00+00:00",
+      "noise_pnl": 141.13,
+      "baseline_pnl": -2024.58,
+      "is_oos": true
+    },
+    {
+      "bar": 1220,
+      "ts": "2026-10-23 20:20:00+00:00",
+      "noise_pnl": 141.13,
+      "baseline_pnl": -2043.46,
+      "is_oos": true
+    },
+    {
+      "bar": 1230,
+      "ts": "2026-10-23 20:30:00+00:00",
+      "noise_pnl": 141.13,
+      "baseline_pnl": -2043.46,
+      "is_oos": true
+    },
+    {
+      "bar": 1240,
+      "ts": "2026-10-23 20:40:00+00:00",
+      "noise_pnl": 141.13,
+      "baseline_pnl": -2086.27,
+      "is_oos": true
+    },
+    {
+      "bar": 1250,
+      "ts": "2026-10-23 20:50:00+00:00",
+      "noise_pnl": 141.13,
+      "baseline_pnl": -2106.49,
+      "is_oos": true
+    },
+    {
+      "bar": 1260,
+      "ts": "2026-10-23 21:00:00+00:00",
+      "noise_pnl": 141.13,
+      "baseline_pnl": -2124.96,
+      "is_oos": true
+    },
+    {
+      "bar": 1270,
+      "ts": "2026-10-23 21:10:00+00:00",
+      "noise_pnl": 141.13,
+      "baseline_pnl": -2122.4,
+      "is_oos": true
+    },
+    {
+      "bar": 1280,
+      "ts": "2026-10-23 21:20:00+00:00",
+      "noise_pnl": 141.13,
+      "baseline_pnl": -2122.4,
+      "is_oos": true
+    },
+    {
+      "bar": 1290,
+      "ts": "2026-10-23 21:30:00+00:00",
+      "noise_pnl": 141.13,
+      "baseline_pnl": -2136.3,
+      "is_oos": true
+    },
+    {
+      "bar": 1300,
+      "ts": "2026-10-23 21:40:00+00:00",
+      "noise_pnl": 141.13,
+      "baseline_pnl": -2160.26,
+      "is_oos": true
+    },
+    {
+      "bar": 1310,
+      "ts": "2026-10-23 21:50:00+00:00",
+      "noise_pnl": 141.13,
+      "baseline_pnl": -2182.35,
+      "is_oos": true
+    },
+    {
+      "bar": 1320,
+      "ts": "2026-10-23 22:00:00+00:00",
+      "noise_pnl": 141.13,
+      "baseline_pnl": -2197.53,
+      "is_oos": true
+    },
+    {
+      "bar": 1330,
+      "ts": "2026-10-23 22:10:00+00:00",
+      "noise_pnl": 141.13,
+      "baseline_pnl": -2214.63,
+      "is_oos": true
+    },
+    {
+      "bar": 1340,
+      "ts": "2026-10-23 22:20:00+00:00",
+      "noise_pnl": 141.13,
+      "baseline_pnl": -2214.63,
+      "is_oos": true
+    },
+    {
+      "bar": 1344,
+      "ts": "2026-10-23 22:24:00+00:00",
+      "noise_pnl": 141.13,
+      "baseline_pnl": -2241.62,
+      "is_oos": true
+    }
+  ],
   "oos_metrics": {
-    "loss": 17.28033478902944,
-    "pnl": 18.67,
-    "return_pct": 0.0187,
-    "max_dd_usd": 71.9,
-    "max_dd_pct": 0.0719,
-    "num_trades": 8,
-    "wins": 5,
-    "losses": 3,
-    "win_rate": 62.5,
-    "profit_factor": 1.22,
+    "loss": 1.3849221678538015,
+    "pnl": 88.62,
+    "return_pct": 0.0886,
+    "max_dd_usd": 0.0,
+    "max_dd_pct": 0.0,
+    "num_trades": 3,
+    "wins": 3,
+    "losses": 0,
+    "win_rate": 100.0,
+    "profit_factor": 9.99,
     "per_ticker": {
       "BTC-USD": {
         "trades": 0,
         "wins": 0,
         "win_rate": 0.0,
-        "pnl": 0
+        "pnl": 0,
+        "avg_win_usd": 24.0,
+        "avg_loss_usd": 14.0,
+        "ev_per_trade_usd": 14.5
       },
       "ETH-USD": {
         "trades": 1,
         "wins": 1,
         "win_rate": 100.0,
-        "pnl": 4.03
+        "pnl": 4.49,
+        "avg_win_usd": 4.49,
+        "avg_loss_usd": 14.0,
+        "ev_per_trade_usd": 4.49
       },
       "SOL-USD": {
-        "trades": 3,
-        "wins": 2,
-        "win_rate": 66.7,
-        "pnl": 47.13
+        "trades": 1,
+        "wins": 1,
+        "win_rate": 100.0,
+        "pnl": 68.93,
+        "avg_win_usd": 68.93,
+        "avg_loss_usd": 14.0,
+        "ev_per_trade_usd": 68.93
       },
       "AVAX-USD": {
-        "trades": 2,
-        "wins": 1,
-        "win_rate": 50.0,
-        "pnl": 7.7
+        "trades": 0,
+        "wins": 0,
+        "win_rate": 0.0,
+        "pnl": 0,
+        "avg_win_usd": 24.0,
+        "avg_loss_usd": 14.0,
+        "ev_per_trade_usd": 14.5
       },
       "LINK-USD": {
-        "trades": 2,
+        "trades": 1,
         "wins": 1,
-        "win_rate": 50.0,
-        "pnl": -40.19
+        "win_rate": 100.0,
+        "pnl": 15.2,
+        "avg_win_usd": 15.2,
+        "avg_loss_usd": 14.0,
+        "ev_per_trade_usd": 15.2
       }
     },
     "equity_curve": [
       0.0,
-      -13.79,
-      48.13,
-      51.39,
-      65.04,
-      86.53,
-      90.56,
-      36.72,
-      18.67
+      68.93,
+      84.13,
+      88.62
     ]
   },
   "baseline_oos_metrics": {
-    "loss": 1504.670528675044,
-    "pnl": -1003.11,
-    "return_pct": -1.0031,
-    "max_dd_usd": 1003.11,
-    "max_dd_pct": 1.0031,
-    "num_trades": 73,
-    "wins": 13,
-    "losses": 60,
-    "win_rate": 17.81,
-    "profit_factor": 0.16,
+    "loss": 1606.4873351790447,
+    "pnl": -1070.99,
+    "return_pct": -1.071,
+    "max_dd_usd": 1070.99,
+    "max_dd_pct": 1.071,
+    "num_trades": 75,
+    "wins": 12,
+    "losses": 63,
+    "win_rate": 16.0,
+    "profit_factor": 0.14,
     "per_ticker": {
       "BTC-USD": {
-        "trades": 13,
-        "wins": 2,
-        "win_rate": 15.4,
-        "pnl": -141.82
+        "trades": 11,
+        "wins": 1,
+        "win_rate": 9.1,
+        "pnl": -137.89,
+        "avg_win_usd": 15.79,
+        "avg_loss_usd": 15.37,
+        "ev_per_trade_usd": -12.54
       },
       "ETH-USD": {
-        "trades": 10,
-        "wins": 1,
-        "win_rate": 10.0,
-        "pnl": -59.03
+        "trades": 12,
+        "wins": 0,
+        "win_rate": 0.0,
+        "pnl": -157.85,
+        "avg_win_usd": 24.0,
+        "avg_loss_usd": 13.15,
+        "ev_per_trade_usd": -13.15
       },
       "SOL-USD": {
-        "trades": 19,
-        "wins": 3,
-        "win_rate": 15.8,
-        "pnl": -234.07
+        "trades": 17,
+        "wins": 2,
+        "win_rate": 11.8,
+        "pnl": -241.4,
+        "avg_win_usd": 8.82,
+        "avg_loss_usd": 17.27,
+        "ev_per_trade_usd": -14.2
       },
       "AVAX-USD": {
-        "trades": 18,
-        "wins": 6,
+        "trades": 21,
+        "wins": 7,
         "win_rate": 33.3,
-        "pnl": -276.01
+        "pnl": -300.9,
+        "avg_win_usd": 10.96,
+        "avg_loss_usd": 26.97,
+        "ev_per_trade_usd": -14.33
       },
       "LINK-USD": {
-        "trades": 13,
-        "wins": 1,
-        "win_rate": 7.7,
-        "pnl": -292.2
+        "trades": 14,
+        "wins": 2,
+        "win_rate": 14.3,
+        "pnl": -232.99,
+        "avg_win_usd": 33.55,
+        "avg_loss_usd": 25.01,
+        "ev_per_trade_usd": -16.64
       }
     },
     "equity_curve": [
       0.0,
-      -23.42,
-      -48.03,
-      -70.55,
-      -75.35,
-      -93.3,
-      -113.19,
-      -135.34,
-      -171.37,
-      -193.75,
-      -221.16,
-      -207.14,
-      -181.2,
-      -217.77,
-      -272.94,
-      -257.15,
-      -222.12,
-      -198.62,
-      -225.49,
-      -255.12,
-      -279.02,
-      -269.47,
-      -298.9,
-      -303.44,
-      -331.16,
-      -332.26,
-      -353.38,
-      -375.11,
-      -398.9,
-      -423.17,
-      -415.07,
-      -441.07,
-      -462.51,
-      -444.69,
-      -436.57,
-      -475.57,
-      -503.68,
-      -527.0,
-      -521.72,
-      -533.52,
-      -554.27,
-      -563.19,
-      -571.99,
-      -571.3,
-      -579.23,
-      -596.84,
-      -597.88,
-      -603.34,
-      -616.33,
-      -638.47,
-      -641.17,
-      -646.83,
-      -673.52,
-      -673.47,
-      -691.63,
-      -693.56,
-      -713.49,
-      -739.61,
-      -758.27,
-      -777.47,
-      -795.81,
-      -825.34,
-      -833.96,
-      -867.72,
-      -891.39,
-      -910.27,
-      -933.72,
-      -953.08,
-      -956.15,
-      -973.3,
-      -991.77,
-      -969.74,
-      -989.21,
-      -1003.11
+      -19.9,
+      -42.04,
+      -78.07,
+      -107.5,
+      -133.37,
+      -157.71,
+      -175.26,
+      -211.82,
+      -267.0,
+      -251.21,
+      -213.88,
+      -164.6,
+      -194.23,
+      -217.69,
+      -241.59,
+      -232.03,
+      -261.47,
+      -266.0,
+      -293.72,
+      -294.82,
+      -315.94,
+      -337.67,
+      -361.46,
+      -385.73,
+      -377.63,
+      -403.64,
+      -425.07,
+      -407.25,
+      -399.13,
+      -438.13,
+      -466.24,
+      -489.56,
+      -484.29,
+      -496.08,
+      -516.83,
+      -525.75,
+      -534.55,
+      -533.87,
+      -541.79,
+      -559.41,
+      -560.44,
+      -565.91,
+      -578.89,
+      -601.04,
+      -603.73,
+      -609.39,
+      -636.09,
+      -636.03,
+      -654.19,
+      -656.13,
+      -676.06,
+      -702.17,
+      -720.84,
+      -740.03,
+      -758.37,
+      -787.9,
+      -796.52,
+      -830.29,
+      -853.95,
+      -872.83,
+      -896.29,
+      -915.64,
+      -918.71,
+      -935.87,
+      -954.33,
+      -932.31,
+      -951.77,
+      -965.68,
+      -989.63,
+      -1011.72,
+      -1030.13,
+      -1026.91,
+      -1044.0,
+      -1060.31,
+      -1070.99
     ]
   },
   "full_day_metrics": {
-    "loss": -74.79046474647475,
-    "pnl": 110.74,
-    "return_pct": 0.1107,
-    "max_dd_usd": 71.9,
-    "max_dd_pct": 0.0719,
-    "num_trades": 16,
-    "wins": 11,
-    "losses": 5,
-    "win_rate": 68.75,
-    "profit_factor": 2.1,
+    "loss": -31.615298363722104,
+    "pnl": 141.13,
+    "return_pct": 0.1411,
+    "max_dd_usd": 39.03,
+    "max_dd_pct": 0.039,
+    "num_trades": 11,
+    "wins": 9,
+    "losses": 2,
+    "win_rate": 81.82,
+    "profit_factor": 3.64,
     "per_ticker": {
       "BTC-USD": {
         "trades": 0,
         "wins": 0,
         "win_rate": 0.0,
-        "pnl": 0
+        "pnl": 0,
+        "avg_win_usd": 24.0,
+        "avg_loss_usd": 14.0,
+        "ev_per_trade_usd": 14.5
       },
       "ETH-USD": {
         "trades": 2,
         "wins": 2,
         "win_rate": 100.0,
-        "pnl": 4.46
+        "pnl": 8.72,
+        "avg_win_usd": 4.36,
+        "avg_loss_usd": 14.0,
+        "ev_per_trade_usd": 4.36
       },
       "SOL-USD": {
-        "trades": 6,
-        "wins": 4,
-        "win_rate": 66.7,
-        "pnl": 81.0
-      },
-      "AVAX-USD": {
-        "trades": 3,
-        "wins": 1,
-        "win_rate": 33.3,
-        "pnl": 5.9
-      },
-      "LINK-USD": {
         "trades": 5,
         "wins": 4,
         "win_rate": 80.0,
-        "pnl": 19.38
+        "pnl": 84.44,
+        "avg_win_usd": 30.87,
+        "avg_loss_usd": 39.03,
+        "ev_per_trade_usd": 16.89
+      },
+      "AVAX-USD": {
+        "trades": 0,
+        "wins": 0,
+        "win_rate": 0.0,
+        "pnl": 0,
+        "avg_win_usd": 24.0,
+        "avg_loss_usd": 14.0,
+        "ev_per_trade_usd": 14.5
+      },
+      "LINK-USD": {
+        "trades": 4,
+        "wins": 3,
+        "win_rate": 75.0,
+        "pnl": 47.97,
+        "avg_win_usd": 20.81,
+        "avg_loss_usd": 14.45,
+        "ev_per_trade_usd": 11.99
       }
     },
     "equity_curve": [
       0.0,
-      33.27,
-      56.01,
-      56.44,
-      62.64,
-      49.55,
-      47.74,
-      71.97,
-      92.07,
-      78.28,
-      140.2,
-      143.46,
-      157.11,
-      178.6,
-      182.63,
-      128.79,
-      110.74
+      2.25,
+      39.3,
+      64.62,
+      68.85,
+      79.02,
+      40.0,
+      66.96,
+      52.51,
+      121.45,
+      136.64,
+      141.13
     ]
   },
   "baseline_full_metrics": {
-    "loss": 3201.536517135901,
-    "pnl": -2134.36,
-    "return_pct": -2.1344,
-    "max_dd_usd": 2134.36,
-    "max_dd_pct": 2.1344,
-    "num_trades": 162,
-    "wins": 23,
-    "losses": 139,
+    "loss": 3362.424749003607,
+    "pnl": -2241.62,
+    "return_pct": -2.2416,
+    "max_dd_usd": 2241.62,
+    "max_dd_pct": 2.2416,
+    "num_trades": 169,
+    "wins": 24,
+    "losses": 145,
     "win_rate": 14.2,
     "profit_factor": 0.1,
     "per_ticker": {
@@ -460,31 +1553,46 @@
         "trades": 34,
         "wins": 3,
         "win_rate": 8.8,
-        "pnl": -397.6
+        "pnl": -398.98,
+        "avg_win_usd": 10.29,
+        "avg_loss_usd": 13.87,
+        "ev_per_trade_usd": -11.73
       },
       "ETH-USD": {
-        "trades": 33,
+        "trades": 36,
         "wins": 4,
-        "win_rate": 12.1,
-        "pnl": -304.09
+        "win_rate": 11.1,
+        "pnl": -356.46,
+        "avg_win_usd": 9.02,
+        "avg_loss_usd": 12.27,
+        "ev_per_trade_usd": -9.9
       },
       "SOL-USD": {
-        "trades": 39,
+        "trades": 40,
         "wins": 5,
-        "win_rate": 12.8,
-        "pnl": -516.49
+        "win_rate": 12.5,
+        "pnl": -538.58,
+        "avg_win_usd": 11.39,
+        "avg_loss_usd": 17.01,
+        "ev_per_trade_usd": -13.46
       },
       "AVAX-USD": {
-        "trades": 27,
-        "wins": 8,
-        "win_rate": 29.6,
-        "pnl": -397.0
+        "trades": 29,
+        "wins": 9,
+        "win_rate": 31.0,
+        "pnl": -404.46,
+        "avg_win_usd": 9.74,
+        "avg_loss_usd": 24.61,
+        "ev_per_trade_usd": -13.95
       },
       "LINK-USD": {
-        "trades": 29,
+        "trades": 30,
         "wins": 3,
-        "win_rate": 10.3,
-        "pnl": -519.23
+        "win_rate": 10.0,
+        "pnl": -543.19,
+        "avg_win_usd": 10.78,
+        "avg_loss_usd": 21.32,
+        "ev_per_trade_usd": -18.11
       }
     },
     "equity_curve": [
@@ -559,324 +1667,283 @@
       -967.1,
       -975.36,
       -1001.75,
-      -1017.77,
-      -1037.38,
-      -1042.96,
-      -1061.54,
-      -1063.23,
-      -1073.36,
-      -1089.65,
-      -1108.15,
-      -1116.74,
-      -1116.91,
-      -1112.13,
-      -1106.52,
-      -1107.83,
-      -1126.96,
-      -1146.53,
-      -1150.63,
-      -1151.06,
-      -1164.86,
-      -1168.16,
-      -1189.4,
-      -1197.22,
-      -1222.28,
-      -1228.85,
-      -1233.66,
-      -1260.57,
-      -1280.46,
-      -1302.61,
-      -1324.99,
-      -1352.4,
-      -1338.38,
-      -1312.45,
-      -1349.01,
-      -1404.19,
-      -1388.4,
-      -1353.37,
-      -1329.86,
-      -1356.74,
-      -1386.37,
-      -1410.27,
-      -1400.71,
-      -1430.15,
-      -1434.68,
-      -1462.4,
-      -1463.5,
-      -1484.62,
-      -1506.35,
-      -1530.15,
-      -1554.41,
-      -1546.31,
-      -1572.32,
-      -1593.75,
-      -1575.93,
-      -1567.81,
-      -1606.81,
-      -1634.92,
-      -1658.24,
-      -1652.97,
-      -1664.76,
-      -1685.51,
-      -1694.43,
-      -1703.23,
-      -1702.55,
-      -1710.47,
-      -1728.09,
-      -1729.12,
-      -1734.59,
-      -1747.57,
-      -1769.72,
-      -1772.41,
-      -1778.07,
-      -1804.77,
-      -1804.71,
-      -1822.87,
+      -1019.15,
+      -1038.76,
+      -1044.35,
+      -1062.92,
+      -1064.61,
+      -1074.74,
+      -1093.25,
+      -1110.09,
+      -1118.69,
+      -1118.85,
+      -1114.07,
+      -1108.47,
+      -1109.78,
+      -1128.9,
+      -1148.48,
+      -1152.57,
+      -1153.0,
+      -1166.8,
+      -1170.1,
+      -1191.34,
+      -1199.16,
+      -1224.23,
+      -1230.8,
+      -1235.6,
+      -1262.51,
+      -1282.4,
+      -1304.55,
+      -1326.93,
+      -1354.35,
+      -1340.33,
+      -1314.39,
+      -1350.95,
+      -1406.13,
+      -1390.34,
+      -1355.31,
+      -1331.81,
+      -1358.68,
+      -1388.31,
+      -1412.21,
+      -1402.66,
+      -1432.09,
+      -1436.63,
+      -1464.35,
+      -1465.44,
+      -1486.57,
+      -1508.3,
+      -1532.09,
+      -1556.36,
+      -1548.26,
+      -1574.26,
+      -1595.69,
+      -1577.88,
+      -1569.75,
+      -1608.75,
+      -1636.87,
+      -1660.19,
+      -1654.91,
+      -1666.71,
+      -1687.46,
+      -1696.37,
+      -1705.17,
+      -1704.49,
+      -1712.41,
+      -1730.03,
+      -1731.06,
+      -1736.53,
+      -1749.52,
+      -1771.66,
+      -1774.36,
+      -1780.02,
+      -1806.71,
+      -1806.65,
       -1824.81,
-      -1844.74,
-      -1870.85,
-      -1889.52,
-      -1908.71,
-      -1927.05,
-      -1956.59,
-      -1965.2,
-      -1998.97,
-      -2022.63,
-      -2041.51,
-      -2064.97,
-      -2084.32,
-      -2087.39,
-      -2104.55,
-      -2123.01,
-      -2100.99,
-      -2120.45,
-      -2134.36
+      -1826.75,
+      -1846.68,
+      -1872.8,
+      -1891.46,
+      -1910.66,
+      -1929.0,
+      -1958.53,
+      -1967.14,
+      -2000.91,
+      -2024.58,
+      -2043.46,
+      -2066.91,
+      -2086.27,
+      -2089.33,
+      -2106.49,
+      -2124.96,
+      -2102.93,
+      -2122.4,
+      -2136.3,
+      -2160.26,
+      -2182.35,
+      -2200.75,
+      -2197.53,
+      -2214.63,
+      -2230.94,
+      -2241.62
     ]
   },
   "trades": [
     {
+      "bar": 67,
+      "ticker": "SOL-USD",
+      "dir": "SELL",
+      "entry_time": "2026-10-23 00:49:00+00:00",
+      "exit_time": "2026-10-23 01:07:00+00:00",
+      "entry": 103.91,
+      "exit": 103.62,
+      "pnl": 2.25,
+      "hold_min": 18.0,
+      "reason": "vwap_target",
+      "pattern": "holographic_reversion",
+      "z_entry": 3.05,
+      "conf": 0.712,
+      "size_usd": 7751.67
+    },
+    {
+      "bar": 120,
       "ticker": "LINK-USD",
       "dir": "SELL",
       "entry_time": "2026-10-23 01:49:00+00:00",
       "exit_time": "2026-10-23 02:00:00+00:00",
       "entry": 12.081,
       "exit": 11.994,
-      "pnl": 33.27,
+      "pnl": 37.05,
       "hold_min": 11.0,
       "reason": "vwap_target",
       "pattern": "holographic_reversion",
       "z_entry": 2.93,
-      "conf": 0.726
+      "conf": 0.726,
+      "size_usd": 7881.81
     },
     {
+      "bar": 205,
       "ticker": "SOL-USD",
       "dir": "SELL",
       "entry_time": "2026-10-23 02:34:00+00:00",
       "exit_time": "2026-10-23 03:25:00+00:00",
       "entry": 104.51,
       "exit": 103.91,
-      "pnl": 22.74,
+      "pnl": 25.32,
       "hold_min": 51.0,
       "reason": "vwap_target",
       "pattern": "holographic_reversion",
       "z_entry": 3.18,
-      "conf": 0.719
+      "conf": 0.719,
+      "size_usd": 7813.69
     },
     {
+      "bar": 256,
       "ticker": "ETH-USD",
       "dir": "SELL",
       "entry_time": "2026-10-23 02:46:00+00:00",
-      "exit_time": "2026-10-23 04:13:00+00:00",
+      "exit_time": "2026-10-23 04:16:00+00:00",
       "entry": 2409.1699,
-      "exit": 2403.0,
-      "pnl": 0.43,
-      "hold_min": 87.0,
+      "exit": 2401.8501,
+      "pnl": 4.23,
+      "hold_min": 90.0,
       "reason": "time_exit",
       "pattern": "holographic_reversion",
       "z_entry": 3.3,
-      "conf": 0.725
+      "conf": 0.725,
+      "size_usd": 7868.73
     },
     {
+      "bar": 287,
       "ticker": "LINK-USD",
       "dir": "SELL",
       "entry_time": "2026-10-23 03:17:00+00:00",
-      "exit_time": "2026-10-23 04:44:00+00:00",
+      "exit_time": "2026-10-23 04:47:00+00:00",
       "entry": 12.17,
-      "exit": 12.129,
-      "pnl": 6.2,
-      "hold_min": 87.0,
+      "exit": 12.124,
+      "pnl": 10.17,
+      "hold_min": 90.0,
       "reason": "time_exit",
       "pattern": "holographic_reversion",
       "z_entry": 3.48,
-      "conf": 0.734
+      "conf": 0.734,
+      "size_usd": 7951.7
     },
     {
+      "bar": 409,
       "ticker": "SOL-USD",
       "dir": "SELL",
       "entry_time": "2026-10-23 06:27:00+00:00",
-      "exit_time": "2026-10-23 07:54:00+00:00",
+      "exit_time": "2026-10-23 06:49:00+00:00",
       "entry": 104.3,
-      "exit": 104.23,
-      "pnl": -13.09,
-      "hold_min": 87.0,
-      "reason": "time_exit",
+      "exit": 104.55,
+      "pnl": -39.03,
+      "hold_min": 22.0,
+      "reason": "stale_reversion",
       "pattern": "holographic_reversion",
       "z_entry": 3.51,
-      "conf": 0.736
+      "conf": 0.736,
+      "size_usd": 7968.76
     },
     {
-      "ticker": "AVAX-USD",
-      "dir": "SELL",
-      "entry_time": "2026-10-23 07:45:00+00:00",
-      "exit_time": "2026-10-23 09:12:00+00:00",
-      "entry": 9.278,
-      "exit": 9.258,
-      "pnl": -1.8,
-      "hold_min": 87.0,
-      "reason": "time_exit",
-      "pattern": "holographic_reversion",
-      "z_entry": 3.86,
-      "conf": 0.753
-    },
-    {
+      "bar": 569,
       "ticker": "SOL-USD",
       "dir": "SELL",
       "entry_time": "2026-10-23 08:18:00+00:00",
       "exit_time": "2026-10-23 09:29:00+00:00",
       "entry": 104.59,
       "exit": 103.98,
-      "pnl": 24.22,
+      "pnl": 26.97,
       "hold_min": 71.0,
       "reason": "vwap_target",
       "pattern": "holographic_reversion",
       "z_entry": 3.78,
-      "conf": 0.749
+      "conf": 0.749,
+      "size_usd": 8094.31
     },
     {
+      "bar": 776,
       "ticker": "LINK-USD",
       "dir": "BUY",
-      "entry_time": "2026-10-23 11:03:00+00:00",
-      "exit_time": "2026-10-23 11:50:00+00:00",
-      "entry": 12.035,
-      "exit": 12.099,
-      "pnl": 20.1,
-      "hold_min": 47.0,
-      "reason": "vwap_target",
+      "entry_time": "2026-10-23 11:26:00+00:00",
+      "exit_time": "2026-10-23 12:56:00+00:00",
+      "entry": 12.059,
+      "exit": 12.067,
+      "pnl": -14.45,
+      "hold_min": 90.0,
+      "reason": "time_exit",
       "pattern": "holographic_reversion",
-      "z_entry": -3.06,
-      "conf": 0.733
+      "z_entry": -3.69,
+      "conf": 0.724,
+      "size_usd": 7864.27
     },
     {
-      "ticker": "AVAX-USD",
-      "dir": "BUY",
-      "entry_time": "2026-10-23 13:12:00+00:00",
-      "exit_time": "2026-10-23 13:55:00+00:00",
-      "entry": 9.152,
-      "exit": 9.15,
-      "pnl": -13.79,
-      "hold_min": 43.0,
-      "reason": "breakeven_stop",
-      "pattern": "holographic_reversion",
-      "z_entry": -3.78,
-      "conf": 0.729
-    },
-    {
+      "bar": 856,
       "ticker": "SOL-USD",
       "dir": "SELL",
       "entry_time": "2026-10-23 13:46:00+00:00",
       "exit_time": "2026-10-23 14:16:00+00:00",
       "entry": 104.75,
       "exit": 103.6,
-      "pnl": 61.92,
+      "pnl": 68.93,
       "hold_min": 30.0,
       "reason": "vwap_target",
       "pattern": "holographic_reversion",
       "z_entry": 3.46,
-      "conf": 0.753
+      "conf": 0.753,
+      "size_usd": 8130.73
     },
     {
-      "ticker": "SOL-USD",
-      "dir": "SELL",
-      "entry_time": "2026-10-23 15:51:00+00:00",
-      "exit_time": "2026-10-23 16:24:00+00:00",
-      "entry": 104.54,
-      "exit": 104.23,
-      "pnl": 3.26,
-      "hold_min": 33.0,
-      "reason": "vwap_target",
-      "pattern": "holographic_reversion",
-      "z_entry": 2.8,
-      "conf": 0.72
-    },
-    {
+      "bar": 994,
       "ticker": "LINK-USD",
       "dir": "BUY",
       "entry_time": "2026-10-23 16:19:00+00:00",
       "exit_time": "2026-10-23 16:34:00+00:00",
       "entry": 12.008,
       "exit": 12.06,
-      "pnl": 13.65,
+      "pnl": 15.2,
       "hold_min": 15.0,
       "reason": "vwap_target",
       "pattern": "holographic_reversion",
       "z_entry": -3.84,
-      "conf": 0.772
+      "conf": 0.772,
+      "size_usd": 8304.58
     },
     {
-      "ticker": "AVAX-USD",
-      "dir": "BUY",
-      "entry_time": "2026-10-23 16:19:00+00:00",
-      "exit_time": "2026-10-23 16:36:00+00:00",
-      "entry": 9.084,
-      "exit": 9.145,
-      "pnl": 21.49,
-      "hold_min": 17.0,
-      "reason": "vwap_target",
-      "pattern": "holographic_reversion",
-      "z_entry": -3.47,
-      "conf": 0.734
-    },
-    {
+      "bar": 1126,
       "ticker": "ETH-USD",
       "dir": "SELL",
       "entry_time": "2026-10-23 17:34:00+00:00",
       "exit_time": "2026-10-23 18:46:00+00:00",
       "entry": 2406.3,
       "exit": 2398.9399,
-      "pnl": 4.03,
+      "pnl": 4.49,
       "hold_min": 72.0,
       "reason": "vwap_target",
       "pattern": "holographic_reversion",
       "z_entry": 3.67,
-      "conf": 0.743
-    },
-    {
-      "ticker": "LINK-USD",
-      "dir": "BUY",
-      "entry_time": "2026-10-23 18:11:00+00:00",
-      "exit_time": "2026-10-23 18:47:00+00:00",
-      "entry": 12.023,
-      "exit": 11.961,
-      "pnl": -53.84,
-      "hold_min": 36.0,
-      "reason": "trailing_stop",
-      "pattern": "holographic_reversion",
-      "z_entry": -3.21,
-      "conf": 0.721
-    },
-    {
-      "ticker": "SOL-USD",
-      "dir": "BUY",
-      "entry_time": "2026-10-23 20:46:00+00:00",
-      "exit_time": "2026-10-23 21:28:00+00:00",
-      "entry": 103.78,
-      "exit": 103.78,
-      "pnl": -18.05,
-      "hold_min": 42.0,
-      "reason": "end_of_window",
-      "pattern": "holographic_reversion",
-      "z_entry": -3.66,
-      "conf": 0.743
+      "conf": 0.743,
+      "size_usd": 8040.87
     }
   ]
 }
