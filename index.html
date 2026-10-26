@@ -253,18 +253,12 @@
       flex-wrap: wrap;
     }
 
-    /* 5-Asset Real-Time Action Strip */
+    /* Dynamic Real-Time Action Strip */
     .asset-strip {
       display: grid;
-      grid-template-columns: repeat(5, 1fr);
+      grid-template-columns: repeat(auto-fit, minmax(215px, 1fr));
       gap: 12px;
       margin-bottom: 18px;
-    }
-
-    @media (max-width: 1150px) {
-      .asset-strip {
-        grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
-      }
     }
 
     .asset-card {
@@ -273,6 +267,7 @@
       border-radius: 11px;
       padding: 13px 15px;
       cursor: pointer;
+      position: relative;
       transition: transform 0.14s, border-color 0.14s, background 0.14s;
     }
 
@@ -286,6 +281,68 @@
       border-color: var(--accent);
       box-shadow: 0 0 0 1px var(--accent), var(--shadow);
       background: var(--bg-card-alt);
+    }
+
+    .asset-del-btn {
+      position: absolute;
+      top: 9px;
+      right: 9px;
+      background: transparent;
+      border: none;
+      color: var(--text-dim);
+      font-size: 0.82rem;
+      line-height: 1;
+      padding: 3px 6px;
+      border-radius: 4px;
+      cursor: pointer;
+      opacity: 0;
+      transition: opacity 0.15s, color 0.15s, background 0.15s;
+    }
+
+    .asset-card:hover .asset-del-btn {
+      opacity: 1;
+    }
+
+    .asset-del-btn:hover {
+      color: var(--rose);
+      background: var(--rose-soft);
+    }
+
+    .asset-card.add-card {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 115px;
+      border: 1px dashed var(--border-strong);
+      background: rgba(30, 45, 74, 0.25);
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .asset-card.add-card:hover {
+      border-color: var(--accent);
+      background: var(--bg-hover);
+      transform: translateY(-1px);
+    }
+
+    .add-card-inner {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      color: var(--text-muted);
+    }
+
+    .add-card-inner .add-icon {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--accent);
+      line-height: 1;
+    }
+
+    .add-card-inner .add-text {
+      font-size: 0.78rem;
+      font-weight: 600;
     }
 
     .asset-top {
@@ -604,6 +661,201 @@
         font-size: 0.75rem;
       }
     }
+
+    /* Watchlist & Symbol Dialog Styles */
+    dialog.modal-dialog {
+      border: 1px solid var(--border-strong);
+      border-radius: 14px;
+      background: var(--bg-card);
+      color: var(--text-main);
+      box-shadow: 0 25px 65px rgba(0, 0, 0, 0.7);
+      padding: 0;
+      max-width: 580px;
+      width: 92vw;
+      margin: auto;
+      position: fixed;
+      inset: 0;
+      overflow: hidden;
+    }
+
+    dialog.modal-dialog::backdrop {
+      background: rgba(0, 0, 0, 0.65);
+      backdrop-filter: blur(4px);
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg-card-alt);
+    }
+
+    .modal-title {
+      font-size: 0.98rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .modal-close-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 1.15rem;
+      cursor: pointer;
+      padding: 4px 8px;
+      border-radius: 6px;
+      line-height: 1;
+    }
+
+    .modal-close-btn:hover {
+      background: var(--bg-hover);
+      color: var(--text-main);
+    }
+
+    .modal-body {
+      padding: 18px 20px;
+      max-height: 65vh;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .modal-section-title {
+      font-size: 0.73rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .preset-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .preset-chip {
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 0.76rem;
+      font-weight: 600;
+      background: var(--bg-card-alt);
+      border: 1px solid var(--border);
+      color: var(--text-main);
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .preset-chip:hover {
+      border-color: var(--accent);
+      background: var(--bg-hover);
+    }
+
+    .preset-chip.active {
+      background: var(--emerald-soft);
+      border-color: var(--emerald);
+      color: var(--emerald);
+    }
+
+    .add-form {
+      display: flex;
+      gap: 10px;
+    }
+
+    .modal-input {
+      flex: 1;
+      background: var(--bg-card-alt);
+      border: 1px solid var(--border);
+      color: var(--text-main);
+      padding: 9px 13px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    .modal-input:focus {
+      border-color: var(--accent);
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #070b14;
+      border-color: var(--accent);
+      font-weight: 700;
+    }
+
+    .btn-primary:hover {
+      filter: brightness(1.1);
+    }
+
+    .modal-feedback {
+      font-size: 0.75rem;
+      margin-top: 6px;
+      min-height: 18px;
+    }
+
+    .modal-feedback.success { color: var(--emerald); }
+    .modal-feedback.error { color: var(--rose); }
+    .modal-feedback.loading { color: var(--amber); }
+
+    .active-symbols-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .active-symbol-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 12px;
+      background: var(--bg-card-alt);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 0.82rem;
+    }
+
+    .active-symbol-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .del-chip-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--rose);
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .del-chip-btn:hover {
+      background: var(--rose-soft);
+      border-color: var(--rose);
+    }
+
+    .modal-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 20px;
+      border-top: 1px solid var(--border);
+      background: var(--bg-card-alt);
+    }
   </style>
 </head>
 <body>
@@ -622,6 +874,7 @@
     <div class="controls">
       <div class="cascade-pill mono" id="cascadePill" style="display:none;">SYNCHRONIZED CASCADE (5/5 BELOW VWAP)</div>
       <div class="status-pill mono" id="wsStatusPill">LIVE STREAM · 0 TICKS</div>
+      <button class="btn" id="manageSymbolsBtn" title="Add or change watchlist symbols">⚙ Symbols (<span id="symbolCountBadge">5</span>)</button>
       <button class="btn" id="recalcBtn" title="Refresh 1m candles and recalculate forward P&L">↻ Refresh Now</button>
       <button class="btn" id="themeToggleBtn" aria-label="Toggle color theme">◐ Theme</button>
     </div>
@@ -812,12 +1065,71 @@
     </div>
   </section>
 
+  <!-- Modal Dialog for Managing Symbols & Watchlist -->
+  <dialog id="symbolDialog" class="modal-dialog" closedby="any" aria-labelledby="symbolDialogTitle">
+    <div class="modal-header">
+      <div class="modal-title" id="symbolDialogTitle">
+        <span>⚙ Manage Watchlist &amp; Symbols</span>
+        <span class="mono" style="font-size:0.75rem;color:var(--text-muted);" id="modalCountBadge">5 Active</span>
+      </div>
+      <button type="button" class="modal-close-btn" id="closeSymbolDialogBtn" aria-label="Close dialog">✕</button>
+    </div>
+    <div class="modal-body">
+      <!-- Presets Section -->
+      <div class="modal-section">
+        <div class="modal-section-title">Popular Coinbase Pairs (Click to Toggle)</div>
+        <div class="preset-pills" id="presetPillsContainer"></div>
+      </div>
+
+      <!-- Custom Symbol Input -->
+      <div class="modal-section">
+        <div class="modal-section-title">Add Custom Product ID (Coinbase USD Pair)</div>
+        <form id="addCustomForm" class="add-form" onsubmit="event.preventDefault(); window.handleAddCustomSymbol();">
+          <input type="text" id="customSymbolInput" class="modal-input mono" placeholder="e.g. DOGE, SUI, NEAR-USD, PEPE" autocomplete="off" />
+          <button type="submit" class="btn btn-primary" id="addCustomBtn">+ Add Pair</button>
+        </form>
+        <div class="modal-feedback mono" id="addFeedback"></div>
+      </div>
+
+      <!-- Active Watchlist Items -->
+      <div class="modal-section">
+        <div class="modal-section-title">Active Watchlist (Click ✕ to Remove)</div>
+        <div class="active-symbols-list" id="activeSymbolsList"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn" id="resetSymbolsBtn" title="Reset to default 5 core assets">↺ Reset to Default 5</button>
+      <button type="button" class="btn btn-primary" id="doneSymbolsBtn">Done</button>
+    </div>
+  </dialog>
+
   <script>
     // Middle-Layer State (synchronized 1-to-1 with data/noise_learned_params.json)
-    const SYMBOLS = ['BTC-USD', 'ETH-USD', 'SOL-USD', 'AVAX-USD', 'LINK-USD'];
+    const DEFAULT_SYMBOLS = ['BTC-USD', 'ETH-USD', 'SOL-USD', 'AVAX-USD', 'LINK-USD'];
+    const PRESET_SYMBOLS = [
+      'BTC-USD', 'ETH-USD', 'SOL-USD', 'AVAX-USD', 'LINK-USD',
+      'DOGE-USD', 'SUI-USD', 'NEAR-USD', 'XRP-USD', 'ADA-USD',
+      'AAVE-USD', 'UNI-USD', 'PEPE-USD', 'RENDER-USD', 'LTC-USD'
+    ];
+
+    function getSavedSymbols() {
+      try {
+        const raw = localStorage.getItem('holographic_symbols');
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            return parsed.map(s => String(s).trim().toUpperCase());
+          }
+        }
+      } catch (e) {}
+      return [...DEFAULT_SYMBOLS];
+    }
+
+    const savedSymbols = getSavedSymbols();
 
     const state = {
-      selectedSymbol: 'BTC-USD',
+      symbols: savedSymbols,
+      selectedSymbol: savedSymbols[0] || 'BTC-USD',
       tickCount: 0,
       totalBars: 1440,
       splitMergeBar: 936,
@@ -860,6 +1172,31 @@
       hoverPnlX: null
     };
 
+    // Ensure initial symbols exist in assetPlan
+    state.symbols.forEach(sym => {
+      if (!state.assetPlan[sym]) {
+        state.assetPlan[sym] = {
+          symbol: sym,
+          alloc_weight: 1.00,
+          trades: 0,
+          wins: 0,
+          win_rate: 65.0,
+          pnl: 0.00,
+          baseline_pnl: 0.00,
+          alpha_saved: 350.00,
+          ev_per_trade_usd: 15.00,
+          last_price: 0,
+          last_vwap: 0,
+          last_std: 0,
+          is_decay: false,
+          ou_half_life: 15.0,
+          elasticity_score: 75.0,
+          kelly_mult: 1.00,
+          mfe_efficiency: 30.0
+        };
+      }
+    });
+
     function fmtPrice(p) {
       if (!Number.isFinite(p) || p <= 0) return '—';
       if (p >= 1000) return '$' + p.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -875,13 +1212,29 @@
 
     // Exact Middle-Out Evaluation for an Asset
     function evaluateAssetAction(symbol) {
-      const plan = state.assetPlan[symbol] || state.assetPlan['BTC-USD'];
+      const plan = state.assetPlan[symbol] || {
+        symbol,
+        alloc_weight: 1.0,
+        trades: 0,
+        wins: 0,
+        win_rate: 65.0,
+        pnl: 0.0,
+        baseline_pnl: 0.0,
+        alpha_saved: 350.0,
+        ev_per_trade_usd: 15.0,
+        last_price: 100,
+        last_vwap: 100,
+        last_std: 0.5,
+        ou_half_life: 15.0,
+        elasticity_score: 75.0,
+        kelly_mult: 1.0
+      };
       const entrySigma = state.learnedParams.entry_dev_sigma;
       const stopSigma = state.learnedParams.stop_loss_sigma;
       const harvestZ = state.learnedParams.exit_vwap_z;
 
-      const price = plan.last_price;
-      const vwap = plan.last_vwap || price;
+      const price = (plan.last_price && plan.last_price > 0) ? plan.last_price : 100;
+      const vwap = (plan.last_vwap && plan.last_vwap > 0) ? plan.last_vwap : price;
       const std = Math.max(plan.last_std || price * 0.0018, price * 0.0012);
       const z = (price - vwap) / std;
       const absZ = Math.abs(z);
@@ -895,7 +1248,7 @@
         ? price * (1 - (stopSigma * std) / price)
         : price * (1 + (stopSigma * std) / price);
 
-      const notional = 5000 * plan.alloc_weight;
+      const notional = 5000 * (plan.alloc_weight ?? 1.0);
       const effectiveSpanSigma = Math.max(entrySigma - harvestZ, absZ - harvestZ, 0.5);
       const expectedMovePct = (effectiveSpanSigma * std) / price;
       const stopMovePct = Math.max(0.003, ((stopSigma - entrySigma) * std) / price);
@@ -910,21 +1263,22 @@
           );
 
       // Check synchronized market breadth
-      const belowCount = SYMBOLS.filter(s => {
+      const belowCount = state.symbols.filter(s => {
         const p = state.assetPlan[s];
-        return p && p.last_price < p.last_vwap;
+        return p && p.last_price && p.last_vwap && p.last_price < p.last_vwap;
       }).length;
 
       let actionText = 'WAIT · IN BAND';
       let badgeClass = 'badge-wait';
       let urgency = absZ / entrySigma;
 
+      const nAssets = state.symbols.length;
       if (plan.alloc_weight <= 0.05) {
         actionText = `PRUNED (SAVED +$${Math.round(plan.alpha_saved || 400)})`;
         badgeClass = 'badge-wait';
         urgency = -1;
-      } else if (belowCount === 5 && z <= -entrySigma) {
-        // Complete Cascade Lock: 5/5 assets below VWAP -> avoid dip buying falling knife
+      } else if (nAssets >= 2 && belowCount >= nAssets && z <= -entrySigma) {
+        // Complete Cascade Lock: all assets below VWAP -> avoid dip buying falling knife
         actionText = 'CASCADE LOCK · AVOID DIP';
         badgeClass = 'badge-lock';
         urgency = 2.0;
@@ -978,16 +1332,23 @@
       document.getElementById('headerBandLabel').textContent = `±${entrySigma.toFixed(2)}σ`;
       document.getElementById('headerTargetLabel').textContent = `±${harvestZ.toFixed(2)}σ`;
 
-      const evaluations = SYMBOLS.map(sym => evaluateAssetAction(sym));
+      // Update badge counts
+      const badge = document.getElementById('symbolCountBadge');
+      if (badge) badge.textContent = state.symbols.length;
+      const tabPlanBtn = document.getElementById('tabLivePlanBtn');
+      if (tabPlanBtn) tabPlanBtn.textContent = `Live Action Plan (${state.symbols.length} Assets)`;
+
+      const evaluations = state.symbols.map(sym => evaluateAssetAction(sym));
       const sortedByUrgency = [...evaluations].sort((a, b) => b.urgency - a.urgency);
-      const topAction = sortedByUrgency[0];
+      const topAction = sortedByUrgency[0] || evaluations[0];
 
       // Cascade Pill Alert
-      const belowCount = topAction.belowCount || 0;
+      const belowCount = topAction ? topAction.belowCount || 0 : 0;
       const cascadePill = document.getElementById('cascadePill');
-      if (belowCount === 5) {
+      const nAssets = state.symbols.length;
+      if (nAssets >= 2 && belowCount >= nAssets) {
         cascadePill.style.display = 'inline-flex';
-        cascadePill.textContent = 'SYNCHRONIZED CASCADE (5/5 BELOW VWAP) · CAPITAL DEFENSE ACTIVE';
+        cascadePill.textContent = `SYNCHRONIZED CASCADE (${belowCount}/${nAssets} BELOW VWAP) · CAPITAL DEFENSE ACTIVE`;
       } else {
         cascadePill.style.display = 'none';
       }
@@ -1048,9 +1409,9 @@
       document.getElementById('orderKelly').textContent = `${selectedEval.kellyMult.toFixed(2)}x`;
       document.getElementById('orderEv').textContent = fmtUsd(selectedEval.expectedTradeEv);
 
-      // Render 5-Asset Strip
+      // Render Dynamic Asset Strip (cards + add button)
       const stripEl = document.getElementById('assetStrip');
-      stripEl.innerHTML = evaluations.map(ev => {
+      const cardsHtml = evaluations.map(ev => {
         const isSelected = ev.symbol === state.selectedSymbol;
         const pctBand = Math.min(100, (ev.absZ / entrySigma) * 100);
         const barColor = ev.alloc === 0
@@ -1067,6 +1428,7 @@
 
         return `
           <div class="asset-card ${isSelected ? 'active' : ''}" data-symbol="${ev.symbol}">
+            <button type="button" class="asset-del-btn" title="Remove ${ev.symbol}" aria-label="Remove ${ev.symbol}" onclick="event.stopPropagation(); window.removeSymbol('${ev.symbol}');">✕</button>
             <div class="asset-top">
               <span class="asset-symbol">${ev.symbol}</span>
               <span class="action-badge ${ev.badgeClass}">${ev.actionText}</span>
@@ -1091,7 +1453,18 @@
         `;
       }).join('');
 
-      stripEl.querySelectorAll('.asset-card').forEach(card => {
+      const addCardHtml = `
+        <div class="asset-card add-card" onclick="window.openSymbolModal();" title="Add or change symbols">
+          <div class="add-card-inner">
+            <span class="add-icon">+</span>
+            <span class="add-text">Add / Change Symbols</span>
+          </div>
+        </div>
+      `;
+
+      stripEl.innerHTML = cardsHtml + addCardHtml;
+
+      stripEl.querySelectorAll('.asset-card:not(.add-card)').forEach(card => {
         card.addEventListener('click', () => {
           state.selectedSymbol = card.getAttribute('data-symbol');
           renderAll();
@@ -1587,81 +1960,335 @@
       }
     }
 
-    // Fetch live 1-minute candles from Coinbase REST API
-    async function fetchLiveCandles() {
-      await Promise.all(SYMBOLS.map(async (symbol) => {
-        try {
-          const url = `https://api.exchange.coinbase.com/products/${symbol}/candles?granularity=60`;
-          const res = await fetch(url);
-          if (!res.ok) return;
-          const raw = await res.json();
-          if (!Array.isArray(raw) || raw.length < 15) return;
+    // WebSocket Instance & Live Subscriptions
+    let wsInstance = null;
 
-          const sorted = raw.slice(0, 180).reverse().map(r => ({
-            time: r[0],
-            low: Number(r[1]),
-            high: Number(r[2]),
-            open: Number(r[3]),
-            close: Number(r[4]),
-            volume: Number(r[5])
-          }));
+    function subscribeSymbol(sym) {
+      if (wsInstance && wsInstance.readyState === WebSocket.OPEN) {
+        wsInstance.send(JSON.stringify({
+          type: 'subscribe',
+          product_ids: [sym],
+          channels: ['ticker']
+        }));
+      }
+    }
 
-          let cumPV = 0, cumV = 0;
-          const diffs = [];
-          sorted.forEach(c => {
-            const tp = (c.high + c.low + c.close) / 3;
-            const v = Math.max(c.volume, 0.01);
-            cumPV += tp * v;
-            cumV += v;
-            const vwapNow = cumPV / cumV;
-            diffs.push(c.close - vwapNow);
-          });
-
-          const vwap = cumPV / cumV;
-          const last30 = diffs.slice(-30);
-          const meanDiff = last30.reduce((a, b) => a + b, 0) / last30.length;
-          const variance = last30.reduce((a, b) => a + (b - meanDiff) ** 2, 0) / Math.max(1, last30.length - 1);
-          const lastClose = sorted[sorted.length - 1].close;
-          const std = Math.max(Math.sqrt(variance), lastClose * 0.0012);
-
-          state.liveCandles[symbol] = sorted;
-          if (state.assetPlan[symbol]) {
-            state.assetPlan[symbol].last_price = lastClose;
-            state.assetPlan[symbol].last_vwap = vwap;
-            state.assetPlan[symbol].last_std = std;
-          }
-        } catch (_) {}
-      }));
-      renderAll();
+    function unsubscribeSymbol(sym) {
+      if (wsInstance && wsInstance.readyState === WebSocket.OPEN) {
+        wsInstance.send(JSON.stringify({
+          type: 'unsubscribe',
+          product_ids: [sym],
+          channels: ['ticker']
+        }));
+      }
     }
 
     // Connect live Coinbase WebSocket
     function connectWebSocket() {
       try {
+        if (wsInstance && (wsInstance.readyState === WebSocket.OPEN || wsInstance.readyState === WebSocket.CONNECTING)) {
+          return;
+        }
         const ws = new WebSocket('wss://ws-feed.exchange.coinbase.com');
+        wsInstance = ws;
         ws.onopen = () => {
           ws.send(JSON.stringify({
             type: 'subscribe',
-            product_ids: SYMBOLS,
+            product_ids: state.symbols,
             channels: ['ticker']
           }));
         };
         ws.onmessage = (event) => {
-          const msg = JSON.parse(event.data);
-          if (msg.type === 'ticker' && msg.product_id && msg.price) {
-            const sym = msg.product_id;
-            const price = Number(msg.price);
-            if (state.assetPlan[sym] && Number.isFinite(price)) {
-              state.assetPlan[sym].last_price = price;
-              state.tickCount += 1;
-              document.getElementById('wsStatusPill').textContent = `LIVE STREAM · ${state.tickCount} TICKS`;
-              renderAll();
+          try {
+            const msg = JSON.parse(event.data);
+            if (msg.type === 'ticker' && msg.product_id && msg.price) {
+              const sym = msg.product_id;
+              const price = Number(msg.price);
+              if (state.assetPlan[sym] && Number.isFinite(price)) {
+                state.assetPlan[sym].last_price = price;
+                state.tickCount += 1;
+                const statusEl = document.getElementById('wsStatusPill');
+                if (statusEl) statusEl.textContent = `LIVE STREAM · ${state.tickCount} TICKS`;
+                renderAll();
+              }
             }
-          }
+          } catch (_) {}
         };
-        ws.onclose = () => setTimeout(connectWebSocket, 4000);
+        ws.onclose = () => {
+          wsInstance = null;
+          setTimeout(connectWebSocket, 4000);
+        };
+        ws.onerror = () => {
+          ws.close();
+        };
       } catch (_) {}
     }
+
+    // Fetch live 1-minute candles from Coinbase REST API for a single asset
+    async function fetchSymbolCandles(symbol) {
+      try {
+        const url = `https://api.exchange.coinbase.com/products/${symbol}/candles?granularity=60`;
+        const res = await fetch(url);
+        if (!res.ok) return false;
+        const raw = await res.json();
+        if (!Array.isArray(raw) || raw.length < 10) return false;
+
+        const sorted = raw.slice(0, 180).reverse().map(r => ({
+          time: r[0],
+          low: Number(r[1]),
+          high: Number(r[2]),
+          open: Number(r[3]),
+          close: Number(r[4]),
+          volume: Number(r[5])
+        }));
+
+        let cumPV = 0, cumV = 0;
+        const diffs = [];
+        sorted.forEach(c => {
+          const tp = (c.high + c.low + c.close) / 3;
+          const v = Math.max(c.volume, 0.01);
+          cumPV += tp * v;
+          cumV += v;
+          const vwapNow = cumPV / cumV;
+          diffs.push(c.close - vwapNow);
+        });
+
+        const vwap = cumPV / cumV;
+        const last30 = diffs.slice(-30);
+        const meanDiff = last30.reduce((a, b) => a + b, 0) / last30.length;
+        const variance = last30.reduce((a, b) => a + (b - meanDiff) ** 2, 0) / Math.max(1, last30.length - 1);
+        const lastClose = sorted[sorted.length - 1].close;
+        const std = Math.max(Math.sqrt(variance), lastClose * 0.0012);
+
+        state.liveCandles[symbol] = sorted;
+
+        if (!state.assetPlan[symbol]) {
+          state.assetPlan[symbol] = {
+            symbol,
+            alloc_weight: 1.00,
+            trades: 0,
+            wins: 0,
+            win_rate: 65.0,
+            pnl: 0.00,
+            baseline_pnl: 0.00,
+            alpha_saved: 350.00,
+            ev_per_trade_usd: 15.00,
+            last_price: lastClose,
+            last_vwap: vwap,
+            last_std: std,
+            is_decay: false,
+            ou_half_life: 15.0,
+            elasticity_score: 75.0,
+            kelly_mult: 1.00,
+            mfe_efficiency: 30.0
+          };
+        } else {
+          state.assetPlan[symbol].last_price = lastClose;
+          state.assetPlan[symbol].last_vwap = vwap;
+          state.assetPlan[symbol].last_std = std;
+        }
+
+        // Rolling AR(1) OLS on z-residuals for OU half-life & elasticity
+        const zSeries = diffs.map(d => d / std);
+        if (zSeries.length >= 20) {
+          let sumXY = 0, sumXX = 0;
+          for (let i = 1; i < zSeries.length; i++) {
+            const x = zSeries[i - 1];
+            const y = zSeries[i];
+            sumXX += x * x;
+            sumXY += x * y;
+          }
+          const phi = sumXX > 0 ? Math.max(0.05, Math.min(0.99, sumXY / sumXX)) : 0.95;
+          const halfLife = Math.max(1.0, Math.min(60.0, -Math.log(2) / Math.log(phi)));
+          const elasticity = Math.max(10, Math.min(99, Math.round((1 - phi) * 200)));
+          state.assetPlan[symbol].ou_half_life = Number(halfLife.toFixed(1));
+          state.assetPlan[symbol].elasticity_score = elasticity;
+          state.assetPlan[symbol].ou_beta = Number(phi.toFixed(3));
+        }
+
+        return true;
+      } catch (err) {
+        console.warn(`Error fetching candles for ${symbol}:`, err);
+        return false;
+      }
+    }
+
+    // Fetch live 1-minute candles for all active symbols
+    async function fetchLiveCandles() {
+      await Promise.all(state.symbols.map(sym => fetchSymbolCandles(sym)));
+      renderAll();
+    }
+
+    // Watchlist Persistence & Mutations
+    function saveSymbols() {
+      try {
+        localStorage.setItem('holographic_symbols', JSON.stringify(state.symbols));
+      } catch (e) {}
+      const badge = document.getElementById('symbolCountBadge');
+      if (badge) badge.textContent = state.symbols.length;
+    }
+
+    async function addSymbol(symInput) {
+      let sym = (symInput || '').trim().toUpperCase();
+      if (!sym) return { success: false, msg: 'Please enter a symbol.' };
+      if (!sym.includes('-')) {
+        sym = `${sym}-USD`;
+      }
+      if (state.symbols.includes(sym)) {
+        const feedback = document.getElementById('addFeedback');
+        if (feedback) {
+          feedback.textContent = `${sym} is already in your watchlist.`;
+          feedback.className = 'modal-feedback error';
+        }
+        return { success: false, msg: `${sym} is already in your watchlist.` };
+      }
+
+      const feedback = document.getElementById('addFeedback');
+      if (feedback) {
+        feedback.textContent = `Validating ${sym} on Coinbase...`;
+        feedback.className = 'modal-feedback loading';
+      }
+
+      const ok = await fetchSymbolCandles(sym);
+      if (!ok) {
+        if (feedback) {
+          feedback.textContent = `✕ Could not find valid Coinbase 1m candles for ${sym}.`;
+          feedback.className = 'modal-feedback error';
+        }
+        return { success: false, msg: `Pair ${sym} not found or inactive on Coinbase.` };
+      }
+
+      state.symbols.push(sym);
+      saveSymbols();
+      subscribeSymbol(sym);
+      renderAll();
+      renderModalUI();
+
+      if (feedback) {
+        feedback.textContent = `✓ Successfully added ${sym}! Live streaming active.`;
+        feedback.className = 'modal-feedback success';
+        setTimeout(() => { feedback.textContent = ''; }, 3500);
+      }
+      return { success: true, symbol: sym };
+    }
+
+    function removeSymbol(sym) {
+      if (state.symbols.length <= 1) {
+        alert('At least 1 asset must remain in the watchlist.');
+        return;
+      }
+      const idx = state.symbols.indexOf(sym);
+      if (idx !== -1) {
+        state.symbols.splice(idx, 1);
+        saveSymbols();
+        unsubscribeSymbol(sym);
+        if (state.selectedSymbol === sym) {
+          state.selectedSymbol = state.symbols[0];
+        }
+        renderAll();
+        renderModalUI();
+      }
+    }
+
+    function resetSymbols() {
+      state.symbols.forEach(s => {
+        if (!DEFAULT_SYMBOLS.includes(s)) {
+          unsubscribeSymbol(s);
+        }
+      });
+      state.symbols = [...DEFAULT_SYMBOLS];
+      saveSymbols();
+      if (!state.symbols.includes(state.selectedSymbol)) {
+        state.selectedSymbol = state.symbols[0];
+      }
+      DEFAULT_SYMBOLS.forEach(s => subscribeSymbol(s));
+      fetchLiveCandles();
+      renderAll();
+      renderModalUI();
+      const feedback = document.getElementById('addFeedback');
+      if (feedback) {
+        feedback.textContent = '✓ Reset to core 5 assets.';
+        feedback.className = 'modal-feedback success';
+        setTimeout(() => { feedback.textContent = ''; }, 3000);
+      }
+    }
+
+    function renderModalUI() {
+      const countBadge = document.getElementById('modalCountBadge');
+      if (countBadge) countBadge.textContent = `${state.symbols.length} Active Assets`;
+      const badge = document.getElementById('symbolCountBadge');
+      if (badge) badge.textContent = state.symbols.length;
+
+      const presetsContainer = document.getElementById('presetPillsContainer');
+      if (presetsContainer) {
+        presetsContainer.innerHTML = PRESET_SYMBOLS.map(sym => {
+          const isWatched = state.symbols.includes(sym);
+          return `
+            <button type="button" class="preset-chip ${isWatched ? 'active' : ''}" onclick="window.togglePreset('${sym}')">
+              <span>${isWatched ? '✓' : '+'}</span>
+              <span>${sym.replace('-USD', '')}</span>
+              <span style="font-size:0.68rem;opacity:0.7;">-USD</span>
+            </button>
+          `;
+        }).join('');
+      }
+
+      const listEl = document.getElementById('activeSymbolsList');
+      if (listEl) {
+        listEl.innerHTML = state.symbols.map(sym => {
+          const plan = state.assetPlan[sym] || {};
+          const priceStr = plan.last_price > 0 ? fmtPrice(plan.last_price) : 'Fetching...';
+          const isSelected = sym === state.selectedSymbol;
+          return `
+            <div class="active-symbol-row">
+              <div class="active-symbol-info">
+                <strong class="mono" style="font-size:0.9rem;">${sym}</strong>
+                <span class="mono" style="color:var(--text-muted);font-size:0.78rem;">${priceStr}</span>
+                ${isSelected ? '<span class="action-badge badge-long" style="font-size:0.6rem;">FOCUSED</span>' : ''}
+              </div>
+              <button type="button" class="del-chip-btn mono" onclick="window.removeSymbol('${sym}')" title="Remove ${sym}">✕ Remove</button>
+            </div>
+          `;
+        }).join('');
+      }
+    }
+
+    window.togglePreset = async function(sym) {
+      if (state.symbols.includes(sym)) {
+        removeSymbol(sym);
+      } else {
+        await addSymbol(sym);
+      }
+    };
+
+    window.removeSymbol = function(sym) {
+      removeSymbol(sym);
+    };
+
+    window.handleAddCustomSymbol = async function() {
+      const input = document.getElementById('customSymbolInput');
+      if (input) {
+        const res = await addSymbol(input.value);
+        if (res.success) input.value = '';
+      }
+    };
+
+    window.openSymbolModal = function() {
+      const dialog = document.getElementById('symbolDialog');
+      if (dialog) {
+        renderModalUI();
+        dialog.showModal();
+        const input = document.getElementById('customSymbolInput');
+        if (input) input.focus();
+      }
+    };
+
+    window.closeSymbolModal = function() {
+      const dialog = document.getElementById('symbolDialog');
+      if (dialog && dialog.open) {
+        dialog.close();
+      }
+    };
 
     // Canvas hover interaction
     const actionCanvasEl = document.getElementById('actionCanvas');
@@ -1741,6 +2368,30 @@
       }
       renderAll();
     });
+
+    document.getElementById('manageSymbolsBtn').addEventListener('click', () => window.openSymbolModal());
+    document.getElementById('closeSymbolDialogBtn').addEventListener('click', () => window.closeSymbolModal());
+    document.getElementById('doneSymbolsBtn').addEventListener('click', () => window.closeSymbolModal());
+    document.getElementById('resetSymbolsBtn').addEventListener('click', () => resetSymbols());
+
+    // Light dismiss fallback for browsers without native 'closedby'
+    const symbolDialog = document.getElementById('symbolDialog');
+    if (symbolDialog) {
+      symbolDialog.addEventListener('click', (event) => {
+        if (event.target === symbolDialog) {
+          const rect = symbolDialog.getBoundingClientRect();
+          const isInDialog = (
+            rect.top <= event.clientY &&
+            event.clientY <= rect.top + rect.height &&
+            rect.left <= event.clientX &&
+            event.clientX <= rect.left + rect.width
+          );
+          if (!isInDialog) {
+            symbolDialog.close();
+          }
+        }
+      });
+    }
 
     window.addEventListener('resize', () => renderAll());
 

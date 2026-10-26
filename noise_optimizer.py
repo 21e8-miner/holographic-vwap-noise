@@ -447,14 +447,16 @@ def evaluate_forward(
 
             req_conf = params.min_confidence
             if fee_aware_breakeven and sig_pat == "holographic_reversion":
-                # Complete Cascade Lock: never fight a 5/5 synchronized market-wide cascade
-                if below_vwap_count == 5 and sig_dir == 'BUY':
+                # Complete Cascade Lock: never fight a synchronized market-wide cascade
+                n_assets = len(bar['tickers'])
+                if below_vwap_count >= n_assets and sig_dir == 'BUY':
                     continue
-                if above_vwap_count == 5 and sig_dir == 'SELL':
+                if above_vwap_count >= n_assets and sig_dir == 'SELL':
                     continue
-                if (btc_chg < -0.0015 or below_vwap_count >= 4) and sig_dir == 'BUY':
+                cascade_threshold = max(3, n_assets - 1)
+                if (btc_chg < -0.0015 or below_vwap_count >= cascade_threshold) and sig_dir == 'BUY':
                     req_conf += 0.035
-                elif (btc_chg > 0.008 or above_vwap_count >= 4) and sig_dir == 'SELL':
+                elif (btc_chg > 0.008 or above_vwap_count >= cascade_threshold) and sig_dir == 'SELL':
                     req_conf += 0.035
 
                 # Ornstein-Uhlenbeck (OU) Mean-Reversion Elasticity Filter
@@ -893,6 +895,15 @@ def fetch_market_data() -> Dict[str, pd.DataFrame]:
 
 
 def main():
+    import argparse
+    parser = argparse.ArgumentParser(description="Noise v2.2 Continuous Forward-Only Optimizer")
+    parser.add_argument("--symbols", type=str, default=None, help="Comma-separated ticker list, e.g. BTC-USD,ETH-USD,SOL-USD,DOGE-USD")
+    args = parser.parse_args()
+    global TICKERS
+    if args.symbols:
+        TICKERS = [s.strip().upper() for s in args.symbols.split(",") if s.strip()]
+        print(f"  Watchlist configured ({len(TICKERS)} assets): {TICKERS}")
+
     t0 = time.time()
     print("=" * 78)
     print("  NOISE v2.1 FORWARD-ONLY ENGINE (Middle-Out QC + Subspace 9-EMA Merge)")
@@ -903,7 +914,7 @@ def main():
         print("No market data returned.")
         return
 
-    print("\n  Precomputing 5-Asset Holographic VWAP & Physics Decision tape...")
+    print(f"\n  Precomputing {len(TICKERS)}-Asset Holographic VWAP & Physics Decision tape...")
     tape = PrecomputedMarketTape(data_map)
     total_bars = len(tape.bars)
     print(f"   Tape ready: {total_bars} 1-minute bars ({time.time() - t0:.2f}s)")
