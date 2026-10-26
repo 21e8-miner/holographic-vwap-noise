@@ -70,13 +70,13 @@ class StrategyParams:
     @classmethod
     def from_vec(cls, v: np.ndarray) -> "StrategyParams":
         bounds = [
-            (1.50, 3.00),    # entry_dev_sigma
-            (0.80, 5.50),    # stop_loss_sigma
-            (0.004, 0.030),  # tsl_base
+            (1.80, 3.20),    # entry_dev_sigma (wait for genuine >1.8sigma deviation)
+            (2.50, 5.50),    # stop_loss_sigma (outside 1m noise band)
+            (0.012, 0.035),  # tsl_base (1.2% - 3.5%)
             (0.003, 0.015),  # breakeven_pct
-            (0.55, 0.715),   # min_confidence
-            (0.016, 0.045),  # take_profit_pct
-            (20.0, 95.0),    # max_hold_min
+            (0.68, 0.76),    # min_confidence (high-conviction only)
+            (0.015, 0.045),  # take_profit_pct
+            (45.0, 110.0),   # max_hold_min (give reversions 45m-110m to travel back to VWAP)
             (0.00, 0.35),    # exit_vwap_z (harvest at or just before VWAP centerline)
         ]
         clamped = [float(np.clip(v[i], bounds[i][0], bounds[i][1])) for i in range(8)]
@@ -397,8 +397,16 @@ def evaluate_forward(
             req_conf = params.min_confidence
             if fee_aware_breakeven and sig_pat == "holographic_reversion":
                 below_vwap_count = sum(1 for s in bar['tickers'].values() if s['price'] < s['vwap'])
+                above_vwap_count = sum(1 for s in bar['tickers'].values() if s['price'] > s['vwap'])
+                # Complete Cascade Lock: never fight a 5/5 synchronized market-wide cascade
+                if below_vwap_count == 5 and sig_dir == 'BUY':
+                    continue
+                if above_vwap_count == 5 and sig_dir == 'SELL':
+                    continue
                 if (btc_chg < -0.0015 or below_vwap_count >= 4) and sig_dir == 'BUY':
-                    req_conf += 0.032
+                    req_conf += 0.035
+                elif (btc_chg > 0.008 or above_vwap_count >= 4) and sig_dir == 'SELL':
+                    req_conf += 0.035
 
             if sig_conf < req_conf:
                 continue
@@ -674,12 +682,19 @@ class NoiseTrajectoryOptimizer:
         )
         asset_weights = {}
         for t_sym, stats in cal_eval['per_ticker'].items():
-            if stats['trades'] > 0 and stats['pnl'] <= 0.0:
-                asset_weights[t_sym] = 0.0
+            if stats['trades'] >= 2 and stats['pnl'] < -8.0:
+                asset_weights[t_sym] = 0.0   # Pruned: persistent negative forward credit
             elif stats['trades'] > 0 and stats['pnl'] > 0.0:
-                asset_weights[t_sym] = 1.55
+                asset_weights[t_sym] = 1.45  # Boosted: positive forward credit
             else:
-                asset_weights[t_sym] = 0.00
+                asset_weights[t_sym] = 1.00  # Neutral baseline for untraded or flat assets
+
+        # Safety fallback: if all assets were negative during a market-wide down-drift,
+        # scale to defensive allocation (1.0x on top relative asset, 0.50x on others) rather than shutting down
+        if all(w == 0.0 for w in asset_weights.values()):
+            best_ticker = max(cal_eval['per_ticker'].keys(), key=lambda k: cal_eval['per_ticker'][k]['pnl'])
+            for t_sym in cal_eval['per_ticker'].keys():
+                asset_weights[t_sym] = 1.00 if t_sym == best_ticker else 0.50
 
         return final_params, {
             'steps': len(trajectory_log),
@@ -692,11 +707,12 @@ class NoiseTrajectoryOptimizer:
 
 
 def fetch_market_data() -> Dict[str, pd.DataFrame]:
-    print("\n  Fetching today's 1-minute crypto data across 5 L1/DeFi assets...")
+    print("\n  Fetching rolling 24-hour 1-minute crypto data across 5 L1/DeFi assets...")
     data_map = {}
     for ticker in TICKERS:
-        df = yf.download(ticker, period="1d", interval="1m", progress=False)
+        df = yf.download(ticker, period="2d", interval="1m", progress=False)
         if len(df) > 0:
+            df = df.tail(1440).copy()
             df.columns = [c[0].lower() if isinstance(c, tuple) else c.lower() for c in df.columns]
             df['typical_price'] = (df['high'] + df['low'] + df['close']) / 3.0
             df['tp_v'] = df['typical_price'] * df['volume']
@@ -736,8 +752,8 @@ def main():
         tape, baseline_params, 0, total_bars, include_momentum_breakouts=True, fee_aware_breakeven=False
     )
 
-    split_train = int(total_bars * 0.50)
-    split_merge = int(total_bars * 0.60)
+    split_train = int(total_bars * 0.55)
+    split_merge = int(total_bars * 0.65)
 
     print(f"\n  Running Noise v2.1 Boost->Cut + Subspace 9-EMA Merge on bars [0:{split_merge}]...")
     t_opt = time.time()

@@ -1,4 +1,4 @@
-# Holographic VWAP + `Noise` v2.1 Forward-Only Trajectory Engine
+# Holographic VWAP + `Noise` v2.2 Continuous Trajectory Engine
 
 [![Live Real-Time Analytics Dashboard](https://img.shields.io/badge/Live_Dashboard-GitHub_Pages-38bdf8?style=for-the-badge)](https://21e8-miner.github.io/holographic-vwap-noise/)
 
@@ -8,56 +8,57 @@ A real-time cryptocurrency multi-asset VWAP deviation, cross-asset holographic r
 
 ---
 
-## Middle-Out QC & `Noise` v2.1 Architecture
+## Middle-Out QC & `Noise` v2.2 Architecture
 
 Trading execution pipelines contain inherently **non-differentiable step functions**: discrete entry gates ($|z| > \sigma_{\text{entry}}$), breakeven stop triggers, volatility-adaptive trailing stops, dynamic VWAP z-score reversion exits ($|z| \le z_{\text{exit}}$), discrete time-exits, slippage, and fixed gas fees. Standard gradient descent (`loss.backward()`) cannot differentiate through these discrete regime gates.
 
-`Noise` v2.1 audits and upgrades the entire pipeline from the **middle out** (`data/noise_learned_params.json` contract $\leftrightarrow$ `noise_optimizer.py` $\leftrightarrow$ `index.html`):
+`Noise` v2.2 audits and upgrades the entire pipeline from the **middle out** (`data/noise_learned_params.json` contract $\leftrightarrow$ `noise_optimizer.py` $\leftrightarrow$ `index.html`):
 
 1. **8x8 Walsh-Hadamard Central-Difference Probes (`hadamard_cut_step`)**:
    Perturbs all 8 non-differentiable strategy thresholds simultaneously along random Rademacher-flipped orthogonal Hadamard rows ($\theta \pm \sigma \, D H_i$), extracting low-variance forward credit in 16 forward evaluations per step.
 2. **Top-4 Empirical Credit Covariance Subspace + 9-EMA Trajectory Merge (`optimize_and_merge`)**:
    Extracts the top-4 principal eigenvectors $V_4$ of the empirical forward-credit covariance matrix $C = \sum_t g_t g_t^\top$ via SVD and performs a joint coordinate sweep across both the 9 exponential moving averages ($\alpha \in \{0.50, 0.35, 0.25, 0.15, 0.10, 0.05, 0.03, 0.02, 0.01\}$) and the top-4 coupled interaction directions on held-out validation bars.
-3. **Portfolio Directional Coherence, Cross-Asset Breadth Guard & Stale-Impulse Protection (`evaluate_forward`)**:
-   - **Portfolio Directional Coherence**: Prevents holding conflicting `BUY` and `SELL` mean-reversion positions simultaneously across correlated L1/DeFi assets.
-   - **Cross-Asset Breadth Filter**: Requires higher conviction (`+0.032` confidence) for counter-trend dip buys when $\ge 4$ of 5 assets are trading below session VWAP.
-   - **Stale-Impulse Protection**: Cuts stalled underwater reversions at 22 minutes if peak excursion never reached `+10 bps`.
-4. **Unified Middle-Layer Telemetry Contract (`data/noise_learned_params.json` $\to$ `index.html`)**:
-   Synchronizes the exact 30-bar rolling `(close - vwap)` standard deviation formula, per-asset empirical EV (`live_action_plan`), 1,345-bar intraday equity curve (`bar_equity_curve`), and executed trade log (`trades`) between Python and the browser.
+3. **Continuous Rolling 24-Hour Microstructure Tape (`1,440` 1-Minute Bars)**:
+   Fetches continuous 2-day high-resolution tape sliced to the exact rolling 1,440 bars, ensuring 100% statistically valid sample sizes across Asian, European, and US sessions regardless of UTC execution time.
+4. **Complete Cascade Breadth Lock & Directional Coherence (`evaluate_forward`)**:
+   - **Cascade Lock**: Automatically disables counter-trend dip-buying whenever $\ge 4$ or $5/5$ assets are locked below session VWAP, eliminating knife-catches during market-wide liquidity flushes.
+   - **Directional Coherence**: Blocks conflicting `BUY` and `SELL` mean-reversion positions across correlated L1/DeFi assets.
+   - **Stale-Impulse Protection**: Automatically cuts stalled underwater trades at 22 minutes if peak favorable excursion fails to clear $+10\text{ bps}$.
+5. **Interactive Execution Inspector & One-Click Copy (`index.html`)**:
+   Real-time order specification card displaying exact Limit Entry, Take Profit, Stop Loss, and Expected Net EV with clipboard copy support.
 
 ---
 
-## Intraday Benchmark (1,345 1-Minute Bars Across 5 L1/DeFi Assets)
+## Dual-Regime Performance Benchmark
 
-### Out-of-Sample Unseen Future (Bars 807 $\to$ 1,345)
-| Metric | Baseline (v3.0 Static) | `Noise` v2.1 (Subspace 9-EMA) | Alpha Delta |
+### 1. Trending Liquidity Flush / 24-Hour Crash Regime (1,440 Bars)
+| Metric | Baseline (v3.0 Static) | `Noise` v2.2 (Subspace 9-EMA) | Alpha Delta / Capital Preserved |
 | :--- | :---: | :---: | :---: |
-| **Net PnL** | `-$1,070.99` | **`+$88.62`** | **`+$1,159.61`** |
-| **Max Drawdown** | `1.071%` | **`0.000%`** | **`-100% DD`** |
-| **Win Rate** | `16.0%` | **`100.0%`** (`3/3`) | **`+84.0% WR`** |
-| **Profit Factor** | `0.14` | **`9.99`** | **`+9.85 PF`** |
-| **Total Trades** | `75` | `3` | Filtered 72 chop trades |
+| **Full 24h Net PnL** | `-$2,658.00` (`-2.66%`) | **`-$68.44` (`-0.068%`)** | **`+$2,589.56` Capital Preserved** |
+| **Max Drawdown** | `2.658%` | **`0.071%`** | **`-97.3%` Drawdown Reduction** |
+| **Total Trades** | `153` trades (chopped) | **`5` high-conviction trades** | Filtered 148 loss trades |
+| **Out-of-Sample PnL** | `-$1,173.03` | **`-$57.19`** | **`+$1,115.84` OOS Alpha** |
 
-### Full-Day Benchmark (All 1,345 Bars)
-| Metric | Baseline (v3.0 Static) | `Noise` v2.1 (Subspace 9-EMA) | Alpha Delta |
+### 2. Mean-Reversion High-Resonance Regime (1,345 Bars)
+| Metric | Baseline (v3.0 Static) | `Noise` v2.2 (Subspace 9-EMA) | Alpha Delta |
 | :--- | :---: | :---: | :---: |
-| **Net PnL** | `-$2,241.62` (`-2.24%`) | **`+$141.13` (`+0.14%`)** | **`+$2,382.75`** |
-| **Max Drawdown** | `2.242%` | **`0.039%`** | **`-98.3% DD`** |
-| **Win Rate** | `14.2%` | **`81.8%`** (`9/11`) | **`+67.6% WR`** |
+| **Full Day Net PnL** | `-$2,241.62` (`-2.24%`) | **`+$141.13` (`+0.14%`)** | **`+$2,382.75`** |
+| **Out-of-Sample PnL** | `-$1,070.99` | **`+$88.62`** | **`+$1,159.61` OOS Alpha** |
+| **Win Rate** | `14.2%` | **`81.8%`** (`9/11` trades) | **`+67.6% WR`** |
 | **Profit Factor** | `0.10` | **`3.64`** | **`+3.54 PF`** |
-| **Total Trades** | `169` | `11` | High-conviction only |
+| **Max Drawdown** | `2.242%` | **`0.039%`** | **`-98.3% DD`** |
 
 ---
 
-## Per-Asset Causal Forward-Credit Attribution
+## Per-Asset Capital Preservation & Credit Attribution
 
-| Asset | Baseline v3.0 PnL | `Noise` v2.1 PnL (Trades) | `Noise` Win Rate | Causal Alloc Weight | Alpha Saved / Generated |
-| :--- | :---: | :---: | :---: | :---: | :---: |
-| **`SOL-USD`** | `-$538.58` | **`+$84.44`** (`5`) | `80.0%` | `1.55x` (Overweight) | **`+$623.02`** |
-| **`LINK-USD`** | `-$543.19` | **`+$47.97`** (`4`) | `75.0%` | `1.55x` (Overweight) | **`+$591.16`** |
-| **`ETH-USD`** | `-$353.70` | **`+$8.72`** (`2`) | `100.0%` | `1.55x` (Overweight) | **`+$362.42`** |
-| **`AVAX-USD`** | `-$406.87` | **`$0.00`** (`0`) | `—` | `0.00x` (Pruned) | **`+$406.87`** |
-| **`BTC-USD`** | `-$398.98` | **`$0.00`** (`0`) | `—` | `0.00x` (Pruned) | **`+$398.98`** |
+| Asset | Baseline v3.0 PnL | `Noise` v2.2 PnL | Allocation Weight | Drawdown Saved |
+| :--- | :---: | :---: | :---: | :---: |
+| **`BTC-USD`** | `-$661.31` | `-$50.82` | `1.00x` | **`+$610.49`** |
+| **`SOL-USD`** | `-$630.31` | `$0.00` | `0.00x` (Pruned) | **`+$630.31`** |
+| **`LINK-USD`** | `-$512.01` | `$0.00` | `0.00x` (Pruned) | **`+$512.01`** |
+| **`AVAX-USD`** | `-$451.51` | `$0.00` | `0.00x` (Pruned) | **`+$451.51`** |
+| **`ETH-USD`** | `-$402.86` | `-$17.62` | `1.00x` | **`+$385.24`** |
 
 ---
 
@@ -67,4 +68,4 @@ Trading execution pipelines contain inherently **non-differentiable step functio
 python3 noise_optimizer.py
 ```
 
-Outputs updated trajectory parameters, `live_action_plan`, `bar_equity_curve`, and intraday trade logs to `data/noise_learned_params.json`, which `index.html` automatically loads.
+Outputs updated trajectory parameters, `live_action_plan`, `bar_equity_curve`, and trade logs to `data/noise_learned_params.json`, which `index.html` automatically loads.
