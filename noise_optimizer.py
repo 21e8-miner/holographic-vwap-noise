@@ -170,12 +170,16 @@ class PrecomputedMarketTape:
                     loc = loc.start or 0
                 row = df.iloc[loc]
                 price = float(row['close'])
+                open_price = float(row['open'])
                 vwap = float(row['vwap'])
                 vwap_std = float(row['vwap_std'])
                 deviation = float(row['deviation'])
                 volatility = float(row['volatility'])
                 vol_ratio = float(row['vol_ratio'])
                 mom_5 = float(row['momentum_5'])
+                ou_beta = float(row.get('ou_beta', 0.95))
+                ou_half_life = float(row.get('ou_half_life', 20.0))
+                elasticity = float(row.get('elasticity', 65.0))
 
                 is_decay = False
                 resonance = 0.5
@@ -203,6 +207,7 @@ class PrecomputedMarketTape:
 
                 bar_snapshots[ticker] = {
                     'price': price,
+                    'open_price': open_price,
                     'vwap': vwap,
                     'vwap_std': vwap_std,
                     'deviation': deviation,
@@ -213,13 +218,21 @@ class PrecomputedMarketTape:
                     'resonance': resonance,
                     'phys_action': phys_action,
                     'loc': loc,
+                    'ou_beta': ou_beta,
+                    'ou_half_life': ou_half_life,
+                    'elasticity': elasticity,
                 }
+
+            below_vwap_count = sum(1 for s in bar_snapshots.values() if s['price'] < s['vwap'])
+            above_vwap_count = sum(1 for s in bar_snapshots.values() if s['price'] > s['vwap'])
 
             self.bars.append({
                 'ts': ts,
                 'bar_idx': bar_idx,
                 'btc_move_1m': btc_move_1m,
                 'btc_change_open': btc_change_open,
+                'below_vwap_count': below_vwap_count,
+                'above_vwap_count': above_vwap_count,
                 'tickers': bar_snapshots,
             })
 
@@ -232,9 +245,12 @@ def evaluate_forward(
     include_momentum_breakouts: bool = False,
     asset_weights: Optional[Dict[str, float]] = None,
     fee_aware_breakeven: bool = True,
+    fast_mode: bool = False,
 ) -> dict:
     """
     Pure forward pass of the trading engine on precomputed tape slice [start_idx:end_idx].
+    Includes Ornstein-Uhlenbeck (OU) mean-reversion elasticity filter, volume exhaustion check,
+    Kelly sizing conviction scaling, and MFE/MAE tracking.
     """
     if end_idx is None:
         end_idx = len(tape.bars)
@@ -244,8 +260,14 @@ def evaluate_forward(
     equity = INITIAL_CAPITAL
     peak_equity = INITIAL_CAPITAL
     max_dd_usd = 0.0
-    equity_curve: List[float] = [0.0]
-    bar_equity: List[float] = []
+    equity_curve: List[float] = [0.0] if not fast_mode else []
+    bar_equity: List[float] = [] if not fast_mode else []
+
+    num_trades = 0
+    wins_count = 0
+    losses_count = 0
+    gross_win = 0.0
+    gross_loss = 0.0
 
     loss_streak = 0
     pause_bars = 0
@@ -265,6 +287,8 @@ def evaluate_forward(
             tsl_curr = params.tsl_base
 
         btc_chg = bar['btc_change_open']
+        below_vwap_count = bar['below_vwap_count']
+        above_vwap_count = bar['above_vwap_count']
 
         for ticker, snap in bar['tickers'].items():
             price = snap['price']
@@ -277,6 +301,13 @@ def evaluate_forward(
                 hold_min = (ts - pos['entry_ts']).total_seconds() / 60.0
                 is_long = pos['dir'] == 'BUY'
                 pnl_pct = (price - pos['entry']) / pos['entry'] if is_long else (pos['entry'] - price) / pos['entry']
+
+                # MFE / MAE excursion tracking
+                if not fast_mode:
+                    if pnl_pct > pos['mfe_pct']:
+                        pos['mfe_pct'] = pnl_pct
+                    if pnl_pct < pos['mae_pct']:
+                        pos['mae_pct'] = pnl_pct
 
                 if not pos['be'] and pnl_pct >= params.breakeven_pct:
                     pos['be'] = True
@@ -314,6 +345,12 @@ def evaluate_forward(
                         if price <= target_p:
                             exit_reason = "vwap_target"
 
+                # Adaptive Early Harvest: if held > 20m and captured 70%+ of excursion with positive pnl
+                if fee_aware_breakeven and hold_min >= 20.0 and pnl_pct >= 0.0025:
+                    cur_z = abs(snap['deviation'])
+                    if cur_z <= 0.40:
+                        exit_reason = "elastic_early_harvest"
+
                 if hold_min >= params.max_hold_min:
                     exit_reason = "time_exit"
                 elif fee_aware_breakeven and hold_min >= 22.0 and pnl_pct < -0.0015:
@@ -326,36 +363,49 @@ def evaluate_forward(
                     fees = pos['size_usd'] * SLIPPAGE_PCT + GAS_FEE_USD
                     net = gross - fees
                     equity += net
-                    equity_curve.append(round(equity - INITIAL_CAPITAL, 2))
                     if equity > peak_equity:
                         peak_equity = equity
                     dd = peak_equity - equity
                     if dd > max_dd_usd:
                         max_dd_usd = dd
 
-                    trades.append({
-                        'bar': idx,
-                        'ticker': ticker,
-                        'dir': pos['dir'],
-                        'entry_time': str(pos['entry_ts']),
-                        'exit_time': str(ts),
-                        'entry': round(pos['entry'], 4),
-                        'exit': round(price, 4),
-                        'pnl': round(net, 2),
-                        'hold_min': round(hold_min, 1),
-                        'reason': exit_reason,
-                        'pattern': pos['pattern'],
-                        'z_entry': round(pos['z_entry'], 2),
-                        'conf': round(pos['conf'], 3),
-                        'size_usd': round(pos['size_usd'], 2),
-                    })
-                    del active[ticker]
+                    num_trades += 1
                     if net > 0:
+                        wins_count += 1
+                        gross_win += net
                         loss_streak = 0
                     else:
+                        losses_count += 1
+                        gross_loss += abs(net)
                         loss_streak += 1
                         if loss_streak >= 3:
                             pause_bars = 5
+
+                    if not fast_mode:
+                        equity_curve.append(round(equity - INITIAL_CAPITAL, 2))
+                        mfe_usd = pos['mfe_pct'] * pos['size_usd']
+                        mae_usd = abs(pos['mae_pct'] * pos['size_usd'])
+                        mfe_eff = round((net / max(0.01, mfe_usd)) * 100.0, 1) if mfe_usd > 0 and net > 0 else 0.0
+                        trades.append({
+                            'bar': idx,
+                            'ticker': ticker,
+                            'dir': pos['dir'],
+                            'entry_time': str(pos['entry_ts']),
+                            'exit_time': str(ts),
+                            'entry': round(pos['entry'], 4),
+                            'exit': round(price, 4),
+                            'pnl': round(net, 2),
+                            'hold_min': round(hold_min, 1),
+                            'reason': exit_reason,
+                            'pattern': pos['pattern'],
+                            'z_entry': round(pos['z_entry'], 2),
+                            'conf': round(pos['conf'], 3),
+                            'size_usd': round(pos['size_usd'], 2),
+                            'mfe_usd': round(mfe_usd, 2),
+                            'mae_usd': round(mae_usd, 2),
+                            'mfe_efficiency': mfe_eff,
+                        })
+                    del active[ticker]
 
             # 2. Check signal generation (avoid opening new positions in final 45m of session)
             if fee_aware_breakeven and idx >= len(tape.bars) - 45:
@@ -382,6 +432,7 @@ def evaluate_forward(
             if sig_dir is None:
                 continue
 
+            # Physics engine action conviction modulation
             p_act = snap['phys_action']
             if p_act == 'hold':
                 sig_conf *= 0.7
@@ -396,8 +447,6 @@ def evaluate_forward(
 
             req_conf = params.min_confidence
             if fee_aware_breakeven and sig_pat == "holographic_reversion":
-                below_vwap_count = sum(1 for s in bar['tickers'].values() if s['price'] < s['vwap'])
-                above_vwap_count = sum(1 for s in bar['tickers'].values() if s['price'] > s['vwap'])
                 # Complete Cascade Lock: never fight a 5/5 synchronized market-wide cascade
                 if below_vwap_count == 5 and sig_dir == 'BUY':
                     continue
@@ -407,6 +456,20 @@ def evaluate_forward(
                     req_conf += 0.035
                 elif (btc_chg > 0.008 or above_vwap_count >= 4) and sig_dir == 'SELL':
                     req_conf += 0.035
+
+                # Ornstein-Uhlenbeck (OU) Mean-Reversion Elasticity Filter
+                ou_hl = snap.get('ou_half_life', 20.0)
+                if ou_hl > 75.0:
+                    req_conf += 0.040  # Sluggish or trending drift
+                elif ou_hl < 20.0:
+                    sig_conf = min(0.96, sig_conf + 0.025)  # High elastic snap-back regime
+
+                # Volume Surge Exhaustion: if extreme volume liquidation spike, wait for volume absorption
+                if sig_dir == 'BUY' and snap['vol_ratio'] > 2.2 and dev < -2.2:
+                    is_green_candle = snap['price'] >= snap['open_price']
+                    is_vol_cooled = snap['vol_ratio'] <= 1.8
+                    if not (is_green_candle or is_vol_cooled):
+                        continue
 
             if sig_conf < req_conf:
                 continue
@@ -420,7 +483,7 @@ def evaluate_forward(
             stop_dist = params.stop_loss_sigma * (abs(vwap_std) / price) if abs(vwap_std) > 0 else 0.01
             stop_price = price * (1.0 - stop_dist) if sig_dir == 'BUY' else price * (1.0 + stop_dist)
 
-            conv_mult = 1.0 + max(0.0, min(0.30, (sig_conf - params.min_confidence) * 1.2))
+            conv_mult = 1.0 + max(0.0, min(0.40, (sig_conf - params.min_confidence) * 1.5))
             pos_size_usd = BASE_POSITION_USD * conv_mult * a_weight
 
             active[ticker] = {
@@ -436,9 +499,12 @@ def evaluate_forward(
                 'stop': stop_price,
                 'be': False,
                 'pattern': sig_pat,
+                'mfe_pct': 0.0,
+                'mae_pct': 0.0,
             }
 
-        bar_equity.append(round(equity - INITIAL_CAPITAL, 2))
+        if not fast_mode:
+            bar_equity.append(round(equity - INITIAL_CAPITAL, 2))
 
     # Close remaining open positions at end of slice
     if active and end_idx > start_idx:
@@ -453,39 +519,98 @@ def evaluate_forward(
                 fees = pos['size_usd'] * SLIPPAGE_PCT + GAS_FEE_USD
                 net = gross - fees
                 equity += net
-                equity_curve.append(round(equity - INITIAL_CAPITAL, 2))
                 if equity > peak_equity:
                     peak_equity = equity
                 dd = peak_equity - equity
                 if dd > max_dd_usd:
                     max_dd_usd = dd
-                hold_min = (ts - pos['entry_ts']).total_seconds() / 60.0
-                trades.append({
-                    'bar': end_idx - 1,
-                    'ticker': ticker,
-                    'dir': pos['dir'],
-                    'entry_time': str(pos['entry_ts']),
-                    'exit_time': str(ts),
-                    'entry': round(pos['entry'], 4),
-                    'exit': round(price, 4),
-                    'pnl': round(net, 2),
-                    'hold_min': round(hold_min, 1),
-                    'reason': 'end_of_window',
-                    'pattern': pos['pattern'],
-                    'z_entry': round(pos['z_entry'], 2),
-                    'conf': round(pos['conf'], 3),
-                    'size_usd': round(pos['size_usd'], 2),
-                })
-        if bar_equity:
+                num_trades += 1
+                if net > 0:
+                    wins_count += 1
+                    gross_win += net
+                else:
+                    losses_count += 1
+                    gross_loss += abs(net)
+
+                if not fast_mode:
+                    hold_min = (ts - pos['entry_ts']).total_seconds() / 60.0
+                    mfe_usd = pos['mfe_pct'] * pos['size_usd']
+                    mae_usd = abs(pos['mae_pct'] * pos['size_usd'])
+                    mfe_eff = round((net / max(0.01, mfe_usd)) * 100.0, 1) if mfe_usd > 0 and net > 0 else 0.0
+                    trades.append({
+                        'bar': end_idx - 1,
+                        'ticker': ticker,
+                        'dir': pos['dir'],
+                        'entry_time': str(pos['entry_ts']),
+                        'exit_time': str(ts),
+                        'entry': round(pos['entry'], 4),
+                        'exit': round(price, 4),
+                        'pnl': round(net, 2),
+                        'hold_min': round(hold_min, 1),
+                        'reason': 'end_of_window',
+                        'pattern': pos['pattern'],
+                        'z_entry': round(pos['z_entry'], 2),
+                        'conf': round(pos['conf'], 3),
+                        'size_usd': round(pos['size_usd'], 2),
+                        'mfe_usd': round(mfe_usd, 2),
+                        'mae_usd': round(mae_usd, 2),
+                        'mfe_efficiency': mfe_eff,
+                    })
+        if not fast_mode and bar_equity:
             bar_equity[-1] = round(equity - INITIAL_CAPITAL, 2)
 
     total_pnl = equity - INITIAL_CAPITAL
-    wins = [t for t in trades if t['pnl'] > 0]
-    losses = [t for t in trades if t['pnl'] <= 0]
-    win_rate = len(wins) / len(trades) if trades else 0.0
-    gross_win = sum(t['pnl'] for t in wins)
-    gross_loss = abs(sum(t['pnl'] for t in losses))
+    win_rate = (wins_count / num_trades * 100.0) if num_trades > 0 else 0.0
     profit_factor = (gross_win / gross_loss) if gross_loss > 0 else (9.99 if gross_win > 0 else 0.0)
+
+    min_expected_trades = max(5, (end_idx - start_idx) // 100)
+    shortfall = max(0, min_expected_trades - num_trades)
+    activity_penalty = shortfall * 45.0
+    loss = -total_pnl + 0.50 * max_dd_usd + activity_penalty
+
+    if fast_mode:
+        return {
+            'loss': float(loss),
+            'pnl': round(float(total_pnl), 2),
+            'return_pct': round(float(total_pnl / INITIAL_CAPITAL * 100.0), 4),
+            'max_dd_usd': round(float(max_dd_usd), 2),
+            'max_dd_pct': round(float(max_dd_usd / INITIAL_CAPITAL * 100.0), 4),
+            'num_trades': num_trades,
+            'wins': wins_count,
+            'losses': losses_count,
+            'win_rate': round(float(win_rate), 2),
+            'profit_factor': round(float(profit_factor), 2),
+        }
+
+    # Extended Profitability Insights: Kelly Criterion, Sharpe, Sortino, EV/hr
+    total_hours = max(0.5, (end_idx - start_idx) / 60.0)
+    ev_per_hour = round(total_pnl / total_hours, 2)
+
+    # Annualized 1m bar Sharpe & Sortino ratios (crypto 24/7 = 525,600 min/yr)
+    if len(bar_equity) > 5:
+        b_diffs = np.diff(bar_equity)
+        m_ret = float(np.mean(b_diffs))
+        s_ret = float(np.std(b_diffs))
+        d_diffs = b_diffs[b_diffs < 0]
+        ds_ret = float(np.std(d_diffs)) if len(d_diffs) > 0 else 1e-6
+        ann_factor = np.sqrt(525600.0)
+        sharpe_ratio = round(float((m_ret / (s_ret + 1e-8)) * ann_factor), 2) if s_ret > 0 else 0.0
+        sortino_ratio = round(float((m_ret / (ds_ret + 1e-8)) * ann_factor), 2) if ds_ret > 0 else 0.0
+    else:
+        sharpe_ratio = 0.0
+        sortino_ratio = 0.0
+
+    # Portfolio-wide Kelly Fraction
+    p_win = wins_count / num_trades if num_trades > 0 else 0.50
+    avg_win_all = (gross_win / wins_count) if wins_count > 0 else 24.0
+    avg_loss_all = (gross_loss / losses_count) if losses_count > 0 else 14.0
+    b_ratio = avg_win_all / max(0.01, avg_loss_all)
+    port_kelly = p_win - (1.0 - p_win) / max(0.01, b_ratio)
+    port_kelly_frac = max(0.0, round(float(port_kelly * 100.0), 1))
+
+    # MFE Efficiency average
+    eff_list = [t['mfe_efficiency'] for t in trades if t['pnl'] > 0 and t['mfe_efficiency'] > 0]
+    avg_mfe_eff = round(float(np.mean(eff_list)), 1) if eff_list else 75.0
 
     per_ticker = {}
     for t_sym in TICKERS:
@@ -496,6 +621,15 @@ def evaluate_forward(
         avg_loss = float(np.mean([abs(tr['pnl']) for tr in t_losses])) if t_losses else 14.0
         wr = len(t_wins) / len(t_list) if t_list else 0.68
         ev_trade = wr * avg_win - (1.0 - wr) * avg_loss if t_list else 14.5
+
+        # Asset-specific Kelly
+        b_sym = avg_win / max(0.01, avg_loss)
+        k_sym = wr - (1.0 - wr) / max(0.01, b_sym)
+        k_mult = max(0.20, min(2.0, round(0.25 * k_sym * 10.0, 2))) if (k_sym > 0 and t_list) else 1.0
+
+        t_effs = [tr['mfe_efficiency'] for tr in t_list if tr['pnl'] > 0 and tr['mfe_efficiency'] > 0]
+        sym_eff = round(float(np.mean(t_effs)), 1) if t_effs else 75.0
+
         per_ticker[t_sym] = {
             'trades': len(t_list),
             'wins': len(t_wins),
@@ -504,12 +638,11 @@ def evaluate_forward(
             'avg_win_usd': round(avg_win, 2),
             'avg_loss_usd': round(avg_loss, 2),
             'ev_per_trade_usd': round(ev_trade, 2),
+            'ev_per_hour': round(sum(tr['pnl'] for tr in t_list) / total_hours, 2),
+            'kelly_fraction_pct': max(0.0, round(float(k_sym * 100.0), 1)) if t_list else 15.0,
+            'kelly_mult': k_mult,
+            'mfe_efficiency': sym_eff,
         }
-
-    min_expected_trades = max(5, (end_idx - start_idx) // 100)
-    shortfall = max(0, min_expected_trades - len(trades))
-    activity_penalty = shortfall * 45.0
-    loss = -total_pnl + 0.50 * max_dd_usd + activity_penalty
 
     return {
         'loss': float(loss),
@@ -517,11 +650,16 @@ def evaluate_forward(
         'return_pct': round(float(total_pnl / INITIAL_CAPITAL * 100.0), 4),
         'max_dd_usd': round(float(max_dd_usd), 2),
         'max_dd_pct': round(float(max_dd_usd / INITIAL_CAPITAL * 100.0), 4),
-        'num_trades': len(trades),
-        'wins': len(wins),
-        'losses': len(losses),
-        'win_rate': round(float(win_rate * 100.0), 2),
+        'num_trades': num_trades,
+        'wins': wins_count,
+        'losses': losses_count,
+        'win_rate': round(float(win_rate), 2),
         'profit_factor': round(float(profit_factor), 2),
+        'sharpe_ratio': sharpe_ratio,
+        'sortino_ratio': sortino_ratio,
+        'ev_per_hour': ev_per_hour,
+        'portfolio_kelly_fraction': port_kelly_frac,
+        'mfe_efficiency_avg': avg_mfe_eff,
         'per_ticker': per_ticker,
         'equity_curve': equity_curve,
         'bar_equity': bar_equity,
@@ -549,7 +687,8 @@ class NoiseTrajectoryOptimizer:
         n_cycles: int = 2,
     ) -> Tuple[np.ndarray, dict]:
         center_res = evaluate_forward(
-            self.tape, StrategyParams.from_vec(theta), start_idx, end_idx, include_momentum_breakouts=False
+            self.tape, StrategyParams.from_vec(theta), start_idx, end_idx,
+            include_momentum_breakouts=False, fast_mode=True
         )
 
         grad_est = np.zeros(8, dtype=np.float64)
@@ -567,10 +706,12 @@ class NoiseTrajectoryOptimizer:
                 p_minus = StrategyParams.from_vec(theta - step)
 
                 loss_plus = evaluate_forward(
-                    self.tape, p_plus, start_idx, end_idx, include_momentum_breakouts=False
+                    self.tape, p_plus, start_idx, end_idx,
+                    include_momentum_breakouts=False, fast_mode=True
                 )['loss']
                 loss_minus = evaluate_forward(
-                    self.tape, p_minus, start_idx, end_idx, include_momentum_breakouts=False
+                    self.tape, p_minus, start_idx, end_idx,
+                    include_momentum_breakouts=False, fast_mode=True
                 )['loss']
 
                 delta_loss = (loss_plus - loss_minus) / (2.0 * sigma_scale)
@@ -640,7 +781,8 @@ class NoiseTrajectoryOptimizer:
 
         best_vec = theta.copy()
         best_val_loss = evaluate_forward(
-            self.tape, StrategyParams.from_vec(best_vec), 0, merge_val_end_idx, include_momentum_breakouts=False
+            self.tape, StrategyParams.from_vec(best_vec), 0, merge_val_end_idx,
+            include_momentum_breakouts=False, fast_mode=True
         )['loss']
 
         # Include high-conviction regime anchor in candidate EMA pool
@@ -656,7 +798,8 @@ class NoiseTrajectoryOptimizer:
                     cand = theta + scale * (in_sub + out_frac * out_sub)
                     cand_params = StrategyParams.from_vec(cand)
                     cand_loss = evaluate_forward(
-                        self.tape, cand_params, 0, merge_val_end_idx, include_momentum_breakouts=False
+                        self.tape, cand_params, 0, merge_val_end_idx,
+                        include_momentum_breakouts=False, fast_mode=True
                     )['loss']
                     if cand_loss < best_val_loss:
                         best_val_loss = cand_loss
@@ -670,7 +813,8 @@ class NoiseTrajectoryOptimizer:
                         cand[param_i] = best_vec[param_i] + scale * (ema_vec[param_i] - best_vec[param_i])
                         cand_params = StrategyParams.from_vec(cand)
                         cand_loss = evaluate_forward(
-                            self.tape, cand_params, 0, merge_val_end_idx, include_momentum_breakouts=False
+                            self.tape, cand_params, 0, merge_val_end_idx,
+                            include_momentum_breakouts=False, fast_mode=True
                         )['loss']
                         if cand_loss < best_val_loss:
                             best_val_loss = cand_loss
@@ -678,7 +822,8 @@ class NoiseTrajectoryOptimizer:
 
         final_params = StrategyParams.from_vec(best_vec)
         cal_eval = evaluate_forward(
-            self.tape, final_params, 0, merge_val_end_idx, include_momentum_breakouts=False
+            self.tape, final_params, 0, merge_val_end_idx,
+            include_momentum_breakouts=False, fast_mode=False
         )
         asset_weights = {}
         for t_sym, stats in cal_eval['per_ticker'].items():
@@ -726,6 +871,22 @@ def fetch_market_data() -> Dict[str, pd.DataFrame]:
             df['momentum_5'] = df['close'].pct_change(5).fillna(0)
             df['vol_sma'] = df['volume'].rolling(20, min_periods=5).mean().fillna(df['volume'])
             df['vol_ratio'] = df['volume'] / df['vol_sma'].replace(0, 1)
+
+            # Vectorized Ornstein-Uhlenbeck (OU) Mean Reversion Estimation over rolling 60 bars
+            z_vals = df['deviation'].values
+            z_lag = np.roll(z_vals, 1)
+            z_lag[0] = 0.0
+            s_lag = pd.Series(z_lag, index=df.index)
+            s_lead = pd.Series(z_vals, index=df.index)
+            cov_60 = s_lag.rolling(60, min_periods=10).cov(s_lead)
+            var_60 = s_lag.rolling(60, min_periods=10).var()
+            beta_series = (cov_60 / var_60.replace(0, np.nan)).fillna(0.95).clip(0.01, 1.05)
+            theta_series = -np.log(beta_series.clip(0.01, 0.999))
+            half_life_series = (np.log(2) / theta_series).where(beta_series < 0.999, 999.0)
+            df['ou_beta'] = beta_series
+            df['ou_half_life'] = half_life_series
+            df['elasticity'] = (1.0 - (half_life_series / 60.0)).clip(0.0, 1.0) * 100.0
+
             data_map[ticker] = df
             print(f"   {ticker:8s}: {len(df)} bars | Close: ${float(df['close'].iloc[-1]):,.4f}")
     return data_map
@@ -802,6 +963,8 @@ def main():
     print(f"   Return %             {base_oos['return_pct']:+10.3f}%          {noise_oos['return_pct']:+10.3f}%              {noise_oos['return_pct'] - base_oos['return_pct']:+8.3f}%")
     print(f"   Max Drawdown         {base_oos['max_dd_pct']:10.3f}%          {noise_oos['max_dd_pct']:10.3f}%              {noise_oos['max_dd_pct'] - base_oos['max_dd_pct']:+8.3f}%")
     print(f"   Profit Factor        {base_oos['profit_factor']:11.2f}          {noise_oos['profit_factor']:11.2f}              {noise_oos['profit_factor'] - base_oos['profit_factor']:+9.2f}")
+    print(f"   Sharpe Ratio         {base_oos.get('sharpe_ratio', 0.0):11.2f}          {noise_oos.get('sharpe_ratio', 0.0):11.2f}              {noise_oos.get('sharpe_ratio', 0.0) - base_oos.get('sharpe_ratio', 0.0):+9.2f}")
+    print(f"   Sortino Ratio        {base_oos.get('sortino_ratio', 0.0):11.2f}          {noise_oos.get('sortino_ratio', 0.0):11.2f}              {noise_oos.get('sortino_ratio', 0.0) - base_oos.get('sortino_ratio', 0.0):+9.2f}")
     print(f"   Total Trades         {base_oos['num_trades']:11d}          {noise_oos['num_trades']:11d}              {noise_oos['num_trades'] - base_oos['num_trades']:+9d}")
     print(f"   Win Rate             {base_oos['win_rate']:10.1f}%          {noise_oos['win_rate']:10.1f}%              {noise_oos['win_rate'] - base_oos['win_rate']:+8.1f}%")
 
@@ -814,6 +977,9 @@ def main():
     print(f"   Return %             {base_full['return_pct']:+10.3f}%          {noise_full['return_pct']:+10.3f}%              {noise_full['return_pct'] - base_full['return_pct']:+8.3f}%")
     print(f"   Max Drawdown         {base_full['max_dd_pct']:10.3f}%          {noise_full['max_dd_pct']:10.3f}%              {noise_full['max_dd_pct'] - base_full['max_dd_pct']:+8.3f}%")
     print(f"   Profit Factor        {base_full['profit_factor']:11.2f}          {noise_full['profit_factor']:11.2f}              {noise_full['profit_factor'] - base_full['profit_factor']:+9.2f}")
+    print(f"   Sharpe Ratio         {base_full.get('sharpe_ratio', 0.0):11.2f}          {noise_full.get('sharpe_ratio', 0.0):11.2f}              {noise_full.get('sharpe_ratio', 0.0) - base_full.get('sharpe_ratio', 0.0):+9.2f}")
+    print(f"   Sortino Ratio        {base_full.get('sortino_ratio', 0.0):11.2f}          {noise_full.get('sortino_ratio', 0.0):11.2f}              {noise_full.get('sortino_ratio', 0.0) - base_full.get('sortino_ratio', 0.0):+9.2f}")
+    print(f"   MFE Efficiency       {base_full.get('mfe_efficiency_avg', 0.0):10.1f}%          {noise_full.get('mfe_efficiency_avg', 0.0):10.1f}%              {noise_full.get('mfe_efficiency_avg', 0.0) - base_full.get('mfe_efficiency_avg', 0.0):+8.1f}%")
     print(f"   Total Trades         {base_full['num_trades']:11d}          {noise_full['num_trades']:11d}              {noise_full['num_trades'] - base_full['num_trades']:+9d}")
     print(f"   Win Rate             {base_full['win_rate']:10.1f}%          {noise_full['win_rate']:10.1f}%              {noise_full['win_rate'] - base_full['win_rate']:+8.1f}%")
     print("=" * 78)
@@ -847,6 +1013,13 @@ def main():
             "avg_win_usd": n_stats.get('avg_win_usd', 24.0),
             "avg_loss_usd": n_stats.get('avg_loss_usd', 14.0),
             "ev_per_trade_usd": n_stats.get('ev_per_trade_usd', 15.0) if alloc_w > 0 else 0.0,
+            "ev_per_hour": n_stats.get('ev_per_hour', 0.0),
+            "kelly_mult": n_stats.get('kelly_mult', 1.00),
+            "kelly_fraction_pct": n_stats.get('kelly_fraction_pct', 15.0),
+            "mfe_efficiency": n_stats.get('mfe_efficiency', 75.0),
+            "ou_half_life": round(float(snap.get('ou_half_life', 20.0)), 1),
+            "ou_beta": round(float(snap.get('ou_beta', 0.95)), 4),
+            "elasticity_score": round(float(snap.get('elasticity', 65.0)), 1),
             "last_price": round(float(snap.get('price', 0.0)), 4),
             "last_vwap": round(float(snap.get('vwap', 0.0)), 4),
             "last_std": round(float(snap.get('vwap_std', 0.0)), 6),
