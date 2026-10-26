@@ -1116,7 +1116,6 @@
           <td class="text-right mono ${ev.expectedTradeEv > 0 ? 'pos' : ''}">${ev.alloc > 0 ? fmtUsd(ev.expectedTradeEv) : 'Pruned (0.0x)'}</td>
         </tr>
       `).join('');
-      `).join('');
 
       document.getElementById('tabTradesBtn').textContent =
         `Executed Trades (${fmtUsd(state.summary.realizedPnl)})`;
