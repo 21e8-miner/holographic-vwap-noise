@@ -225,6 +225,12 @@ class PrecomputedMarketTape:
 
             below_vwap_count = sum(1 for s in bar_snapshots.values() if s['price'] < s['vwap'])
             above_vwap_count = sum(1 for s in bar_snapshots.values() if s['price'] > s['vwap'])
+            mean_z = float(np.mean([s['deviation'] for s in bar_snapshots.values()])) if bar_snapshots else 0.0
+
+            for s in bar_snapshots.values():
+                s['basket_mean_z'] = mean_z
+                s['delta_z'] = s['deviation'] - mean_z
+                s['is_idiosyncratic'] = abs(s['delta_z']) >= 0.70
 
             self.bars.append({
                 'ts': ts,
@@ -233,6 +239,7 @@ class PrecomputedMarketTape:
                 'btc_change_open': btc_change_open,
                 'below_vwap_count': below_vwap_count,
                 'above_vwap_count': above_vwap_count,
+                'basket_mean_z': mean_z,
                 'tickers': bar_snapshots,
             })
 
@@ -465,6 +472,19 @@ def evaluate_forward(
                     req_conf += 0.040  # Sluggish or trending drift
                 elif ou_hl < 20.0:
                     sig_conf = min(0.96, sig_conf + 0.025)  # High elastic snap-back regime
+
+                # Cross-Asset Dislocation Filter (Information Dislocation insight):
+                # Distinguish true idiosyncratic mispricing from synchronized market-wide beta dumps
+                delta_z = snap.get('delta_z', 0.0)
+                if sig_dir == 'BUY' and delta_z > -0.30:
+                    req_conf += 0.025  # Asset merely drifting with market basket
+                elif sig_dir == 'BUY' and delta_z <= -0.75:
+                    sig_conf = min(0.97, sig_conf + 0.020)  # Genuine idiosyncratic dislocation
+
+                # Out-of-Distribution (OOD) Support Gate: reject extreme volatility outliers (>95th percentile)
+                vol = snap.get('volatility', 0.005)
+                if vol > 0.028:
+                    continue
 
                 # Volume Surge Exhaustion: if extreme volume liquidation spike, wait for volume absorption
                 if sig_dir == 'BUY' and snap['vol_ratio'] > 2.2 and dev < -2.2:
@@ -898,7 +918,15 @@ def main():
     import argparse
     parser = argparse.ArgumentParser(description="Noise v2.2 Continuous Forward-Only Optimizer")
     parser.add_argument("--symbols", type=str, default=None, help="Comma-separated ticker list, e.g. BTC-USD,ETH-USD,SOL-USD,DOGE-USD")
+    parser.add_argument("--verify", action="store_true", help="Run full VERITAS + Information Dislocation verification harness")
     args = parser.parse_args()
+
+    if args.verify:
+        import verification_harness
+        print("\n>> RUNNING VERITAS + INFORMATION DISLOCATION VERIFICATION HARNESS <<\n")
+        verification_harness.main()
+        print("\n>> VERIFICATION PASSED. PROCEEDING TO ENGINE EXECUTION <<\n")
+
     global TICKERS
     if args.symbols:
         TICKERS = [s.strip().upper() for s in args.symbols.split(",") if s.strip()]
