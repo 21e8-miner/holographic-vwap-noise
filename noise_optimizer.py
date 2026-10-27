@@ -876,42 +876,97 @@ class NoiseTrajectoryOptimizer:
 def fetch_market_data() -> Dict[str, pd.DataFrame]:
     print("\n  Fetching rolling 24-hour 1-minute crypto data across 5 L1/DeFi assets...")
     data_map = {}
-    for ticker in TICKERS:
-        df = yf.download(ticker, period="2d", interval="1m", progress=False)
-        if len(df) > 0:
-            df = df.tail(1440).copy()
-            df.columns = [c[0].lower() if isinstance(c, tuple) else c.lower() for c in df.columns]
-            df['typical_price'] = (df['high'] + df['low'] + df['close']) / 3.0
-            df['tp_v'] = df['typical_price'] * df['volume']
-            df['cum_tp_v'] = df['tp_v'].cumsum()
-            df['cum_v'] = df['volume'].cumsum()
-            df['vwap'] = (df['cum_tp_v'] / df['cum_v'].replace(0, np.nan)).fillna(df['close'])
-            df['vwap_std'] = (df['close'] - df['vwap']).rolling(30, min_periods=5).std().fillna(df['close'] * 0.001)
-            df['deviation'] = (df['close'] - df['vwap']) / df['vwap_std'].replace(0, 0.001)
-            df['returns'] = df['close'].pct_change().fillna(0)
-            df['volatility'] = df['returns'].rolling(20, min_periods=5).std().fillna(0.001)
-            df['momentum_5'] = df['close'].pct_change(5).fillna(0)
-            df['vol_sma'] = df['volume'].rolling(20, min_periods=5).mean().fillna(df['volume'])
-            df['vol_ratio'] = df['volume'] / df['vol_sma'].replace(0, 1)
+    cache_path = os.path.join(SCRIPT_DIR, "data", "coinbase_1440m_tape.json")
 
-            # Vectorized Ornstein-Uhlenbeck (OU) Mean Reversion Estimation over rolling 60 bars
-            z_vals = df['deviation'].values
-            z_lag = np.roll(z_vals, 1)
-            z_lag[0] = 0.0
-            s_lag = pd.Series(z_lag, index=df.index)
-            s_lead = pd.Series(z_vals, index=df.index)
-            cov_60 = s_lag.rolling(60, min_periods=10).cov(s_lead)
-            var_60 = s_lag.rolling(60, min_periods=10).var()
-            beta_series = (cov_60 / var_60.replace(0, np.nan)).fillna(0.95).clip(0.01, 1.05)
-            theta_series = -np.log(beta_series.clip(0.01, 0.999))
-            half_life_series = (np.log(2) / theta_series).where(beta_series < 0.999, 999.0)
-            df['ou_beta'] = beta_series
-            df['ou_half_life'] = half_life_series
-            df['elasticity'] = (1.0 - (half_life_series / 60.0)).clip(0.0, 1.0) * 100.0
+    # Primary attempt: Yahoo Finance
+    try:
+        for ticker in TICKERS:
+            df = yf.download(ticker, period="2d", interval="1m", progress=False)
+            if len(df) > 0:
+                df = df.tail(1440).copy()
+                df.columns = [c[0].lower() if isinstance(c, tuple) else c.lower() for c in df.columns]
+                data_map[ticker] = df
+    except Exception as e:
+        print(f"  [!] Yahoo Finance download failed: {e}")
+        data_map = {}
 
-            data_map[ticker] = df
-            print(f"   {ticker:8s}: {len(df)} bars | Close: ${float(df['close'].iloc[-1]):,.4f}")
-    return data_map
+    # High-reliability fallback: Coinbase 1440m Tape (cached or REST API)
+    if len(data_map) < len(TICKERS):
+        if os.path.exists(cache_path):
+            print(f"  [+] Loading verified 1440m multi-asset tape from {cache_path}...")
+            with open(cache_path) as f:
+                raw = json.load(f)
+            data_map = {}
+            for sym, candles in raw.items():
+                df = pd.DataFrame(candles, columns=['timestamp', 'low', 'high', 'open', 'close', 'volume'])
+                df['datetime'] = pd.to_datetime(df['timestamp'], unit='s')
+                df = df.sort_values('timestamp').drop_duplicates('timestamp').set_index('datetime')
+                data_map[sym] = df
+        else:
+            import urllib.request
+            import datetime
+            print("  [+] Fetching 1440m tape directly from Coinbase REST API...")
+            now = datetime.datetime.now(datetime.timezone.utc)
+            raw = {}
+            for sym in TICKERS:
+                all_candles = []
+                for i in range(5):
+                    end_t = now - datetime.timedelta(minutes=i * 290)
+                    start_t = end_t - datetime.timedelta(minutes=290)
+                    url = f"https://api.exchange.coinbase.com/products/{sym}/candles?granularity=60&start={start_t.isoformat()}&end={end_t.isoformat()}"
+                    req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+                    try:
+                        with urllib.request.urlopen(req, timeout=8) as resp:
+                            all_candles.extend(json.loads(resp.read().decode()))
+                            time.sleep(0.08)
+                    except Exception:
+                        pass
+                unique = {c[0]: c for c in all_candles}
+                raw[sym] = sorted(unique.values(), key=lambda x: x[0])
+                df = pd.DataFrame(raw[sym], columns=['timestamp', 'low', 'high', 'open', 'close', 'volume'])
+                df['datetime'] = pd.to_datetime(df['timestamp'], unit='s')
+                df = df.sort_values('timestamp').drop_duplicates('timestamp').set_index('datetime')
+                data_map[sym] = df
+            os.makedirs(os.path.join(SCRIPT_DIR, "data"), exist_ok=True)
+            with open(cache_path, "w") as f:
+                json.dump(raw, f)
+
+    # Process indicators for all assets
+    processed = {}
+    for ticker, df in data_map.items():
+        df = df.tail(1440).copy()
+        df.columns = [c[0].lower() if isinstance(c, tuple) else c.lower() for c in df.columns]
+        df['typical_price'] = (df['high'] + df['low'] + df['close']) / 3.0
+        df['tp_v'] = df['typical_price'] * df['volume']
+        df['cum_tp_v'] = df['tp_v'].cumsum()
+        df['cum_v'] = df['volume'].cumsum()
+        df['vwap'] = (df['cum_tp_v'] / df['cum_v'].replace(0, np.nan)).fillna(df['close'])
+        df['vwap_std'] = (df['close'] - df['vwap']).rolling(30, min_periods=5).std().fillna(df['close'] * 0.001)
+        df['deviation'] = (df['close'] - df['vwap']) / df['vwap_std'].replace(0, 0.001)
+        df['returns'] = df['close'].pct_change().fillna(0)
+        df['volatility'] = df['returns'].rolling(20, min_periods=5).std().fillna(0.001)
+        df['momentum_5'] = df['close'].pct_change(5).fillna(0)
+        df['vol_sma'] = df['volume'].rolling(20, min_periods=5).mean().fillna(df['volume'])
+        df['vol_ratio'] = df['volume'] / df['vol_sma'].replace(0, 1)
+
+        # Vectorized Ornstein-Uhlenbeck (OU) Mean Reversion Estimation over rolling 60 bars
+        z_vals = df['deviation'].values
+        z_lag = np.roll(z_vals, 1)
+        z_lag[0] = 0.0
+        s_lag = pd.Series(z_lag, index=df.index)
+        s_lead = pd.Series(z_vals, index=df.index)
+        cov_60 = s_lag.rolling(60, min_periods=10).cov(s_lead)
+        var_60 = s_lag.rolling(60, min_periods=10).var()
+        beta_series = (cov_60 / var_60.replace(0, np.nan)).fillna(0.95).clip(0.01, 1.05)
+        theta_series = -np.log(beta_series.clip(0.01, 0.999))
+        half_life_series = (np.log(2) / theta_series).where(beta_series < 0.999, 999.0)
+        df['ou_beta'] = beta_series
+        df['ou_half_life'] = half_life_series
+        df['elasticity'] = (1.0 - (half_life_series / 60.0)).clip(0.0, 1.0) * 100.0
+
+        processed[ticker] = df
+        print(f"   {ticker:8s}: {len(df)} bars | Close: ${float(df['close'].iloc[-1]):,.4f}")
+    return processed
 
 
 def main():
@@ -1092,6 +1147,17 @@ def main():
 
     out_path = os.path.join(SCRIPT_DIR, "data", "noise_learned_params.json")
     os.makedirs(os.path.dirname(out_path), exist_ok=True)
+    
+    # Load Pillar 4 & 5 empirical cut results if available
+    reclaim_results = {}
+    reclaim_file = os.path.join(SCRIPT_DIR, "data", "reclaim_paired_cut_results.json")
+    if os.path.exists(reclaim_file):
+        try:
+            with open(reclaim_file) as rf:
+                reclaim_results = json.load(rf)
+        except Exception:
+            pass
+
     with open(out_path, "w") as f:
         json.dump({
             "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
@@ -1107,6 +1173,8 @@ def main():
             "full_day_metrics": {k: v for k, v in noise_full.items() if k not in ('trades', 'bar_equity')},
             "baseline_full_metrics": {k: v for k, v in base_full.items() if k not in ('trades', 'bar_equity')},
             "trades": noise_full.get('trades', []),
+            "pillar_4_dislocation": reclaim_results.get('pillar_4_peer_residualization', {}),
+            "pillar_5_chaos_latency": reclaim_results.get('pillar_5_chaos_latency_sweep', {})
         }, f, indent=2)
     print(f"\n  Saved v2.1 middle-out telemetry & trajectory parameters to: {out_path}")
 

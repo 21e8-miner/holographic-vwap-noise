@@ -1,0 +1,101 @@
+{
+  "timestamp": "2026-10-27T01:50:29.434232+00:00",
+  "pillar_4_peer_residualization": {
+    "all_raw_reclaims": {
+      "trade_count": 100,
+      "win_rate_pct": 36.0,
+      "avg_r": -1.054,
+      "profit_factor": 0.21,
+      "total_r": -105.38,
+      "total_losses_r": -133.29,
+      "loss_count": 64
+    },
+    "paired_cut_market_cascade_gte_4": {
+      "trade_count": 82,
+      "win_rate_pct": 39.0,
+      "avg_r": -0.937,
+      "profit_factor": 0.26,
+      "total_r": -76.87,
+      "total_losses_r": -103.86,
+      "loss_count": 50
+    },
+    "paired_cut_whole_basket_below_5": {
+      "trade_count": 70,
+      "win_rate_pct": 44.3,
+      "avg_r": -0.875,
+      "profit_factor": 0.3,
+      "total_r": -61.27,
+      "total_losses_r": -87.56,
+      "loss_count": 39
+    },
+    "paired_cut_mixed_basket_lte_3": {
+      "trade_count": 18,
+      "win_rate_pct": 22.2,
+      "avg_r": -1.584,
+      "profit_factor": 0.03,
+      "total_r": -28.51,
+      "total_losses_r": -29.43,
+      "loss_count": 14
+    },
+    "paired_cut_idiosyncratic_dislocated": {
+      "trade_count": 18,
+      "win_rate_pct": 22.2,
+      "avg_r": -1.584,
+      "profit_factor": 0.03,
+      "total_r": -28.51,
+      "total_losses_r": -29.43,
+      "loss_count": 14
+    },
+    "paired_cut_delta_z_strong": {
+      "trade_count": 45,
+      "win_rate_pct": 31.1,
+      "avg_r": -1.076,
+      "profit_factor": 0.23,
+      "total_r": -48.41,
+      "total_losses_r": -62.97,
+      "loss_count": 31
+    },
+    "paired_cut_delta_z_weak": {
+      "trade_count": 55,
+      "win_rate_pct": 40.0,
+      "avg_r": -1.036,
+      "profit_factor": 0.19,
+      "total_r": -56.98,
+      "total_losses_r": -70.33,
+      "loss_count": 33
+    },
+    "cascade_loss_concentration_pct": 77.9
+  },
+  "pillar_5_chaos_latency_sweep": {
+    "immediate_t_plus_1": {
+      "trade_count": 100,
+      "win_rate_pct": 36.0,
+      "avg_r": -1.054,
+      "profit_factor": 0.21,
+      "total_r": -105.38,
+      "total_losses_r": -133.29,
+      "loss_count": 64
+    },
+    "delay_1m_t_plus_2": {
+      "trade_count": 91,
+      "win_rate_pct": 26.4,
+      "avg_r": -1.074,
+      "profit_factor": 0.2,
+      "total_r": -97.75,
+      "total_losses_r": -122.75,
+      "loss_count": 67
+    },
+    "delay_5m_t_plus_6": {
+      "trade_count": 83,
+      "win_rate_pct": 22.9,
+      "avg_r": -1.485,
+      "profit_factor": 0.11,
+      "total_r": -123.27,
+      "total_losses_r": -138.07,
+      "loss_count": 64
+    },
+    "alpha_decay_1m_r": -0.02,
+    "alpha_decay_5m_r": -0.431,
+    "survives_5m_delay": false
+  }
+}
